@@ -30,7 +30,7 @@ extern "C" {
     // Buffer info
     unsigned int width, height;
     unsigned int oversample_h, oversample_v;
-    GLuint texture;
+    GLuint atlas;
     // Internal data
     void *data;
     int converted_codepoints;

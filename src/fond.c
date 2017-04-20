@@ -3,19 +3,19 @@
 #define STBTT_STATIC
 #define STBRP_STATIC
 
+#include <stdio.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "fond_common.h"
 #include "fond.h"
 #include "stb_rect_pack.h"
 #include "stb_truetype.h"
 
 void fond_free(struct fond_font *font){
-  if(font->texture)
-    glDeleteTextures(1, &font->texture);
-  font->texture = 0;
+  if(font->atlas)
+    glDeleteTextures(1, &font->atlas);
+  font->atlas = 0;
   
   if(font->converted_codepoints && font->codepoints)
     free(font->codepoints);
@@ -77,8 +77,8 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   stbtt_PackEnd(&context);
   free(fontdata);
 
-  glGenTextures(1, &font->texture);
-  glBindTexture(GL_TEXTURE_2D, font->texture);
+  glGenTextures(1, &font->atlas);
+  glBindTexture(GL_TEXTURE_2D, font->atlas);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -94,9 +94,9 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   return 1;
 
  fond_load_internal_cleanup:
-  if(font->texture)
-    glDeleteTextures(1, &font->texture);
-  font->texture = 0;
+  if(font->atlas)
+    glDeleteTextures(1, &font->atlas);
+  font->atlas = 0;
   return 0;
 }
 
@@ -226,9 +226,8 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
     fond_compute_glyph(font, codepoints[i], &x, &y, i, vert, ind);
   }
 
-  GLuint vao[1];
+  GLuint vao[1], vbo[2];
   glGenVertexArrays(1, vao);
-  GLuint vbo[2];
   glGenBuffers(2, vbo);
 
   glBindVertexArray(vao[0]);

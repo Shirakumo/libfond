@@ -117,8 +117,9 @@ int fond_render(struct fond_buffer *buffer, char *text){
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
   glUseProgram(buffer->program);
   glBindVertexArray(vao);
-  glBindTexture(GL_TEXTURE_2D, buffer->font->texture);
+  glBindTexture(GL_TEXTURE_2D, buffer->font->atlas);
   {
+    glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
   }
