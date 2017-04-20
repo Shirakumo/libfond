@@ -5,13 +5,15 @@ set(CMAKE_BUILD_TYPE Release)
 
 include_directories("src/")
 
+add_custom_target(shaders ALL)
 file(GLOB_RECURSE shaders "src/shader/*")
 foreach(shader_src ${shaders})
   set(shader_h ${shader_src}.h)
   set_source_files_properties(${shader_h} PROPERTIES GENERATED TRUE)
-  add_custom_command(OUTPUT ${shader_h}
-    COMMAND xdd -i ${shader_src} ${shader_h}
-    COMMAND sed -i 's/};/,0x00};/g' ${shader_h}
+  add_custom_command(
+    TARGET shaders
+    COMMAND xxd -i ${shader_src} ${shader_h}
+    COMMAND sed -i 's/}\;/,0x00}\;/' ${shader_h}
     DEPENDS ${shader_src}
     COMMENT "Generating header for ${shader_src}")
 endforeach()
