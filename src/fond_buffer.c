@@ -3,6 +3,9 @@
 #include "shader/to_texture.vert.h"
 #include "shader/to_texture.frag.h"
 
+const GLchar *to_texture_vert_src = to_texture_vert;
+const GLchar *to_texture_frag_src = to_texture_frag;
+
 void fond_free_buffer(struct fond_buffer *buffer){
   if(buffer->texture)
     glDeleteTextures(1, &buffer->texture);
@@ -49,7 +52,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   }
 
   vert = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vert, 1, (const GLchar *const*)&to_texture_vert, 0);
+  glShaderSource(vert, 1, &to_texture_vert_src, 0);
   glCompileShader(vert);
   glGetShaderiv(vert, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
@@ -58,7 +61,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   }
   
   frag = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(frag, 1, (const GLchar *const*)&to_texture_frag, 0);
+  glShaderSource(frag, 1, &to_texture_frag_src, 0);
   glCompileShader(frag);
   glGetShaderiv(frag, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
