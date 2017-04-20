@@ -59,7 +59,7 @@ extern "C" {
   void fond_free(struct fond_font *font);
   int fond_load(struct fond_font *font);
   int fond_load_fit(struct fond_font *font, unsigned int max_size);
-  int fond_compute(struct fond_font *font, char *text, unsigned int *n, float *x, float *y, GLuint *vao);
+  int fond_compute(struct fond_font *font, char *text, size_t *n, float *x, float *y, GLuint *vao);
 
   void fond_free_buffer(struct fond_buffer *buffer);
   int fond_load_buffer(struct fond_buffer *buffer);

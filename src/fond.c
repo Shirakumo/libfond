@@ -28,7 +28,7 @@ void fond_free(struct fond_font *font){
 }
 
 int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
-  unsigned int bytesize = 0, size = 0;
+  size_t bytesize = 0, size = 0;
 
   if(font->codepoints){
     for(; font->codepoints[size]; ++size);
@@ -40,7 +40,7 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
       goto fond_pack_range_cleanup;
     }
     
-    if(!utf8_to_utf32(font->characters, font->codepoints, bytesize, size)){
+    if(!utf8_to_utf32((uint8_t *)font->characters, font->codepoints, bytesize, &size)){
       errcode = UTF8_CONVERSION_ERROR;
       goto fond_pack_range_cleanup;
     }
@@ -54,13 +54,13 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
     goto fond_pack_range_cleanup;
   }
   
-  range->array_of_unicode_codepoints = font->codepoints;
+  range->array_of_unicode_codepoints = (int *)font->codepoints;
   range->num_chars = size;
   range->chardata_for_range = font->data;
   return 1;
 
  fond_pack_range_cleanup:
-  if(errcode = UTF8_CONVERSION_ERROR){
+  if(errcode == UTF8_CONVERSION_ERROR){
     if(font->codepoints)
       free(font->codepoints);
     font->codepoints = 0;
@@ -76,11 +76,6 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
 int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pack_range *range){
   stbtt_pack_context context = {0};
   unsigned char atlasdata[font->width*font->height];
-
-  if(!atlasdata){
-    errcode = OUT_OF_MEMORY;
-    goto fond_load_internal_cleanup;
-  }
   
   if(!stbtt_PackBegin(&context, atlasdata, font->width, font->height, 0, 1, 0)){
     errcode = FONT_PACK_FAILED;
@@ -89,7 +84,7 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
 
   stbtt_PackSetOversampling(&context, font->oversample_h, font->oversample_v);
 
-  if(!stbtt_PackFontRanges(&context, fontdata, font->index, &range, 1)){
+  if(!stbtt_PackFontRanges(&context, fontdata, font->index, range, 1)){
     errcode = FONT_PACK_FAILED;
     goto fond_load_internal_cleanup;
   }
@@ -193,17 +188,17 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   return 0;
 }
 
-unsigned int fond_codepoint_index(struct fond_font *font, uint32_t glyph){
-  for(unsigned int i=0; font->codepoints[i]; ++i){
+int fond_codepoint_index(struct fond_font *font, uint32_t glyph){
+  for(size_t i=0; font->codepoints[i]; ++i){
     if(font->codepoints[i] == glyph)
       return i;
   }
   return -1;
 }
 
-int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *y, int i, GLfloat  *vert, GLfloat *tex, GLuint *ind){
+int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *y, size_t i, GLfloat  *vert, GLfloat *tex, GLuint *ind){
   stbtt_aligned_quad quad = {0};
-  unsigned int index = fond_codepoint_index(font, glyph);
+  int index = fond_codepoint_index(font, glyph);
   if(index < 0){
     errcode = UNLOADED_GLYPH;
     return 1;
@@ -231,23 +226,26 @@ int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *
 }
 
 
-int fond_compute(struct fond_font *font, char *text, unsigned int *_n, float *_x, float *_y, GLuint *_vao){
+int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, float *_y, GLuint *_vao){
   if(!font->data){
     errcode = NOT_LOADED;
     return 0;
   }
 
-  unsigned int bytesize = 0, size = 0;
+  size_t bytesize = 0, size = 0;
   for(; text[bytesize]; ++bytesize);
   uint32_t codepoints[bytesize];
-  utf8_to_utf32(text, codepoints, bytesize, size);
+  if(!utf8_to_utf32((uint8_t *)text, codepoints, bytesize, &size)){
+    errcode = UTF8_CONVERSION_ERROR;
+    return 0;
+  }
   
   GLfloat vert[4*3*size]; // Quad is 4 vertices with 3 floats
   GLfloat tex[4*2*size];  // Quad is 4 texcoords with 2 floats
   GLuint ind[2*3*size];   // Quad is 2 triangles with 3 points
 
   float x = 0, y = 0;
-  unsigned int i = 0;
+  size_t i = 0;
   for(; i<size; ++i){
     fond_compute_glyph(font, codepoints[i], &x, &y, i, vert, tex, ind);
   }

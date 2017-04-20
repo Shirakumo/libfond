@@ -103,7 +103,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
 
 int fond_render(struct fond_buffer *buffer, char *text){
   float x, y;
-  unsigned int n;
+  size_t n;
   GLuint vao = 0
 
   if(!fond_compute(buffer->font, text, &n, &x, &y, &vao)){
