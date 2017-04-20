@@ -145,8 +145,8 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
     goto fond_load_fit_cleanup;
   }
   
-  if(font->width == 0) font->width = 128;
-  if(font->height == 0) font->height = 128;
+  if(font->width == 0) font->width = 64;
+  if(font->height == 0) font->height = 64;
   
   while(font->width < max_size){
     if(fond_load_internal(font, fontdata, &range))
