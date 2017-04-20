@@ -52,6 +52,7 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
     return 0;
   }
   
+  range->font_size = font->size;
   range->array_of_unicode_codepoints = (int *)font->codepoints;
   range->num_chars = size;
   range->chardata_for_range = font->data;
