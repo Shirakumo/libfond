@@ -181,7 +181,7 @@ int fond_codepoint_index(struct fond_font *font, uint32_t glyph){
   return -1;
 }
 
-int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *y, size_t i, GLfloat  *vert, GLfloat *tex, GLuint *ind){
+int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *y, size_t i, GLfloat  *vert, GLuint *ind){
   stbtt_aligned_quad quad = {0};
   int index = fond_codepoint_index(font, glyph);
   if(index < 0){
@@ -191,19 +191,13 @@ int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *
   
   stbtt_GetPackedQuad((stbtt_packedchar *)font->data, font->width, font->height, index, x, y, &quad, 1);
 
-  int vi = i*4*3;
-  vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = 0;
-  vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = 0;
-  vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = 0;
-  vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = 0;
-
-  int ti = i*4*2;
-  tex[ti++] = quad.s0; tex[ti++] = quad.t1;
-  tex[ti++] = quad.s0; tex[ti++] = quad.t0;
-  tex[ti++] = quad.s1; tex[ti++] = quad.t0;
-  tex[ti++] = quad.s1; tex[ti++] = quad.t1;
+  int vi = 4*(3+2)*i;
+  vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = quad.s0; vert[vi++] = quad.t1;
+  vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = quad.s0; vert[vi++] = quad.t0;
+  vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = quad.s1; vert[vi++] = quad.t0;
+  vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = quad.s1; vert[vi++] = quad.t1;
   
-  int ii = i*2*3;
+  int ii = 2*3*i;
   ind[ii++] = i; ind[ii++] = i+1; ind[ii++] = i+2;
   ind[ii++] = i; ind[ii++] = i+2; ind[ii++] = i+3;
 
@@ -223,41 +217,36 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
     return 0;
   }
   
-  GLfloat vert[4*3*size]; // Quad is 4 vertices with 3 floats
-  GLfloat tex[4*2*size];  // Quad is 4 texcoords with 2 floats
-  GLuint ind[2*3*size];   // Quad is 2 triangles with 3 points
+  GLfloat vert[4*(3+2)*size];
+  GLuint ind[2*3*size];
 
   float x = 0, y = 0;
   size_t i = 0;
   for(; i<size; ++i){
-    fond_compute_glyph(font, codepoints[i], &x, &y, i, vert, tex, ind);
+    fond_compute_glyph(font, codepoints[i], &x, &y, i, vert, ind);
   }
 
   GLuint vao[1];
   glGenVertexArrays(1, vao);
-  GLuint vbo[3];
-  glGenBuffers(3, vbo);
+  GLuint vbo[2];
+  glGenBuffers(2, vbo);
 
   glBindVertexArray(vao[0]);
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*3*size, vert, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3+2)*sizeof(float), (GLvoid*)0);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*(3+2)*size, vert, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*(3+2), (GLvoid*)0);
   glEnableVertexAttribArray(0);
-  
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*2*size, tex, GL_STATIC_DRAW);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (3+2)*sizeof(float), (GLvoid*)(3*sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*(3+2), (GLvoid*)(3*sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*6*size, ind, GL_STATIC_DRAW);
   
+  glBindVertexArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDeleteBuffers(3, vbo);
-
-  glBindVertexArray(0);
+  glDeleteBuffers(2, vbo);
 
   if(glGetError() != GL_NO_ERROR){
     free(codepoints);
