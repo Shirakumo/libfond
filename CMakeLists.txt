@@ -3,8 +3,16 @@ project(fond)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_BUILD_TYPE Release)
 
-include_directories("src/")
+find_package(OpenGL REQUIRED)
+find_package(GLEW)
+find_package(GLFW)
 
+include_directories("src/")
+include_directories(${OPENGL_INCLUDE_DIRS})
+include_directories(${GLFW_INCLUDE_DIRS})
+include_directories(${GLEW_INCLUDE_DIRS})
+
+## Generate Shader Headers
 add_custom_target(shaders ALL)
 file(GLOB shaders "src/shader/*.vert" "src/shader/*.frag")
 foreach(shader_s ${shaders})
@@ -21,17 +29,25 @@ foreach(shader_s ${shaders})
     COMMENT "Generating header for ${shader_s}")
 endforeach()
 
-file(GLOB_RECURSE sources "src/*.c")
-add_library(fond SHARED ${sources})
-set_property(TARGET fond PROPERTY C_STANDARD 99)
+## Main Library
+file(GLOB lib_src "src/*.c")
+add_library(fond_lib SHARED ${lib_src})
+set_property(TARGET fond_lib PROPERTY C_STANDARD 99)
+target_link_libraries(fond_lib ${OPENGL_LIBRARIES})
 
+## Test Program
+if(GLFW_FOUND AND GLEW_FOUND)
+  file(GLOB test_src "test/*.c")
+  add_executable(fond_test ${test_src})
+  set_property(TARGET fond_test PROPERTY C_STANDARD 99)
+  target_link_libraries(fond_test fond_lib ${GLFW_LIBRARIES} ${GLEW_LIBRARIES})
+endif()
+
+## Warnings
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
   add_definitions(/W2)
 elseif(CMAKE_BUILD_TOOL MATCHES "(gcc|clang)")
   add_definitions(-W -Wall -Wextra -pedantic)
 endif()
 
-find_package(OpenGL REQUIRED)
-target_link_libraries(fond ${OPENGL_LIBRARIES})
-
-install(TARGETS fond DESTINATION /usr/lib)
+install(TARGETS fond_lib DESTINATION /usr/local/lib)
