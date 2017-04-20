@@ -31,20 +31,23 @@ int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789.-;:?!/()😺";
   
-  printf("Loading font...\n");
+  printf("Loading font... ");
   if(!fond_load_fit(font, 2048))
     return 0;
+  printf("DONE (Atlas %ix%i)\n", font->width, font->height);
 
   buffer->font = font;
   buffer->width = 256;
   buffer->height = 256;
-  printf("Loading buffer...\n");
+  printf("Loading buffer... ");
   if(!fond_load_buffer(buffer))
     return 0;
+  printf("DONE\n");
 
-  printf("Rendering buffer...\n");
+  printf("Rendering buffer... ");
   if(!fond_render(buffer, "Hello Everynyan! 😺"))
     return 0;
+  printf("DONE\n");
   
   return 1;
 }
@@ -65,7 +68,7 @@ int main(int argc, char **argv){
     return 0;
   }
 
-  printf("Initializing GL...\n");
+  printf("Initializing GL... ");
   
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -135,18 +138,18 @@ int main(int argc, char **argv){
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   if(glGetError() != GL_NO_ERROR){
-    printf("Failed to initialize GL.\n");
+    printf("FAILED\n");
     goto main_cleanup;
   }
+  printf("DONE\n");
 
   struct fond_font font = {0};
   struct fond_buffer buffer = {0};
   if(!load_stuff(argv[1], &font, &buffer)){
-    printf("Failed to load: %s\n", fond_error_string(fond_error()));
+    printf("Error: %s\n", fond_error_string(fond_error()));
     goto main_cleanup;
   }
-
-  printf("Done.\n");
+  
   while(!glfwWindowShouldClose(window)){
     glfwPollEvents();
 
