@@ -1,7 +1,7 @@
 #version 330 core
 
-in (layout = 0) vec3 position;
-in (layout = 1) vec2 in_tex_coord;
+in layout(location = 0) vec3 position;
+in layout(location = 1) vec2 in_tex_coord;
 
 out vec2 tex_coord;
 
