@@ -20,7 +20,12 @@ unsigned char *fond_load_file(char *file){
   unsigned char *data = calloc(finfo.st_size, sizeof(char));
   if(!data) return 0;
 
-  return fgets(data, finfo.st_size, fd);
+  if(fread(data, sizeof(char), finfo.st_size, fd) < finfo.st_size){
+    free(data);
+    return 0;
+  }
+  
+  return data;
 }
 
 int fond_error(){
