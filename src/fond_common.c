@@ -1,5 +1,6 @@
 #include "fond.h"
 #include "fond_common.h"
+#include "utf8.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,6 +8,28 @@
 #include <sys/types.h>
 
 int errorcode = 0;
+
+int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
+  if(utf8valid(string)){
+    errorcode = UTF8_CONVERSION_ERROR;
+    return 0;
+  }
+  
+  size_t size = utf8len(string)+1;
+  int32_t *decoded = calloc(size, sizeof(uint32_t));
+  if(!decoded){
+    errorcode = OUT_OF_MEMORY;
+    return 0;
+  }
+  
+  for(int i=0; i<size; ++i){
+    string = utf8codepoint(string, &decoded[i]);
+  }
+
+  *_decoded = decoded;
+  if(_size) *_size = size;
+  return 1;
+}
 
 unsigned char *fond_load_file(char *file){
   unsigned int size = 512;
@@ -52,6 +75,8 @@ char *fond_error_string(int error){
     return "Failed to convert UTF8 string to UTF32. It is probably malformatted.";
   case UNLOADED_GLYPH:
     return "A glyph that was not loaded into the font was attempted to be drawn.";
+  case NO_CHARACTERS_OR_CODEPOINTS:
+    return "Font struct did not contain a character or a codepoints array.";
   default:
     return "Unknown error code.";
   }

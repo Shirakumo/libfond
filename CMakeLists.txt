@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(fond)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW)
@@ -24,6 +24,8 @@ foreach(shader_s ${shaders})
   add_custom_command(
     TARGET shaders
     COMMAND xxd -i ${shader_sf} ${shader_hf}
+    COMMAND sed -i 's/unsigned char/const GLchar/g' ${shader_hf}
+    COMMAND sed -i 's/}\;/, 0x00}\;/g' ${shader_hf}
     DEPENDS ${shader_s}
     WORKING_DIRECTORY ${shader_dir}
     COMMENT "Generating header for ${shader_s}")

@@ -6,11 +6,11 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "fond_common.h"
 #include "fond.h"
 #include "stb_rect_pack.h"
 #include "stb_truetype.h"
-#include "utf8.h"
 
 void fond_free(struct fond_font *font){
   if(font->texture)
@@ -32,45 +32,30 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
 
   if(font->codepoints){
     for(; font->codepoints[size]; ++size);
-  }else{
-    for(; font->characters[bytesize]; ++bytesize);
-    font->codepoints = calloc(bytesize, sizeof(uint32_t));
-    if(!font->codepoints){
-      errorcode = OUT_OF_MEMORY;
-      goto fond_pack_range_cleanup;
-    }
-    
-    if(!utf8_to_utf32((uint8_t *)font->characters, font->codepoints, bytesize, &size)){
-      errorcode = UTF8_CONVERSION_ERROR;
-      goto fond_pack_range_cleanup;
+  }else if(font->characters){
+    if(!fond_decode_utf8((void *)font->characters, &font->codepoints, 0)){
+      return 0;
     }
     
     font->converted_codepoints = 1;
+  }else{
+    errorcode = NO_CHARACTERS_OR_CODEPOINTS;
+    return 0;
   }
   
   font->data = calloc(size, sizeof(stbtt_packedchar));
   if(!font->data){
+    if(font->data)
+      free(font->data);
+    font->data = 0;
     errorcode = OUT_OF_MEMORY;
-    goto fond_pack_range_cleanup;
+    return 0;
   }
   
   range->array_of_unicode_codepoints = (int *)font->codepoints;
   range->num_chars = size;
   range->chardata_for_range = font->data;
   return 1;
-
- fond_pack_range_cleanup:
-  if(errorcode == UTF8_CONVERSION_ERROR){
-    if(font->codepoints)
-      free(font->codepoints);
-    font->codepoints = 0;
-  }
-  
-  if(font->data)
-    free(font->data);
-  font->data = 0;
-  
-  return 0;
 }
 
 int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pack_range *range){
@@ -232,11 +217,9 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
     return 0;
   }
 
-  size_t bytesize = 0, size = 0;
-  for(; text[bytesize]; ++bytesize);
-  uint32_t codepoints[bytesize];
-  if(!utf8_to_utf32((uint8_t *)text, codepoints, bytesize, &size)){
-    errorcode = UTF8_CONVERSION_ERROR;
+  size_t size = 0;
+  int32_t *codepoints;
+  if(!fond_decode_utf8((void *)text, &codepoints, &size)){
     return 0;
   }
   
@@ -277,6 +260,7 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
   glBindVertexArray(0);
 
   if(glGetError() != GL_NO_ERROR){
+    free(codepoints);
     glDeleteVertexArrays(1, vao);
     errorcode = OPENGL_ERROR;
     return 0;

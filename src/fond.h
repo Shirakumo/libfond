@@ -26,7 +26,7 @@ extern "C" {
     int index;
     float size;
     char *characters;
-    uint32_t *codepoints;
+    int32_t *codepoints;
     // Buffer info
     unsigned int width, height;
     unsigned int oversample_h, oversample_v;
@@ -53,7 +53,8 @@ extern "C" {
     SIZE_EXCEEDED,
     NOT_LOADED,
     UTF8_CONVERSION_ERROR,
-    UNLOADED_GLYPH
+    UNLOADED_GLYPH,
+    NO_CHARACTERS_OR_CODEPOINTS
   };
 
   void fond_free(struct fond_font *font);

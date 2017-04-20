@@ -4,6 +4,25 @@
 #include <stdio.h>
 #include "../src/fond.h"
 
+const GLchar *vertex_shader = "#version 330 core\n"
+  "layout (location = 0) in vec3 position;\n"
+  "layout (location = 1) in vec2 in_texcoord;\n"
+  "out vec2 texcoord;\n"
+  "\n"
+  "void main(){\n"
+  "  gl_Position = vec4(position, 1.0);\n"
+  "  texcoord = in_texcoord;\n"
+  "}";
+
+const GLchar *fragment_shader = "#version 330 core\n"
+  "uniform sampler2D tex_image;\n"
+  "in vec2 texcoord;\n"
+  "out vec4 color;\n"
+  "\n"
+  "void main(){\n"
+  "  color = texture(tex_image, texcoord);"
+  "}\n";
+
 int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
   font->file = file;
   font->size = 12.0;
@@ -34,6 +53,7 @@ void render(GLuint program, GLuint vao, struct fond_buffer *buffer){
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  glBindTexture(GL_TEXTURE_2D, buffer->texture);
   glUseProgram(program);
   glBindVertexArray(vao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -56,15 +76,14 @@ int main(int argc, char **argv){
   GLFWwindow* window = glfwCreateWindow(800, 600, "Fond Test", 0, 0);
   if(window == 0){
     printf("Failed to create GLFW window\n");
-    glfwTerminate();
-    return 1;
+    goto main_cleanup;
   }
   glfwMakeContextCurrent(window);
 
   glewExperimental = GL_TRUE;
   if(glewInit() != GLEW_OK){
     printf("Failed to initialize GLEW\n");
-    return 1;
+    goto main_cleanup;
   }
 
   int width, height;
@@ -73,24 +92,11 @@ int main(int argc, char **argv){
 
   GLuint vert, frag, program, vbo, ebo, vao;
   vert = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vert, 1, ""
-"#version 330 core"
-"layout (location = 0) in vec3 position;"
-""
-"void main(){"
-"  gl_Position = vec4(position, 1.0);"
-"}", 0);
+  glShaderSource(vert, 1, &vertex_shader, 0);
   glCompileShader(vert);
 
   frag = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(frag, 1, ""
-"#version 330 core"
-"uniform sampler2D tex_image;"
-"out vec4 color;"
-""
-"void main(){"
-"  "
-"}", 0);
+  glShaderSource(frag, 1, &fragment_shader, 0);
   glCompileShader(frag);
 
   program = glCreateProgram();
@@ -132,7 +138,7 @@ int main(int argc, char **argv){
   struct fond_buffer buffer = {0};
   if(!load_stuff(argv[1], &font, &buffer)){
     printf("Failed to load: %s\n", fond_error_string(fond_error()));
-    return 1;
+    goto main_cleanup;
   }
 
   printf("Done.\n");
@@ -143,7 +149,8 @@ int main(int argc, char **argv){
     
     glfwSwapBuffers(window);
   }
-  
+
+ main_cleanup:
   glfwTerminate();
   return 0;
 }

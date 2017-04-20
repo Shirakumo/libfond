@@ -49,7 +49,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   }
 
   vert = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vert, 1, (const GLchar *const*)&to_texture_vert, (GLint *)&to_texture_vert_len);
+  glShaderSource(vert, 1, (const GLchar *const*)&to_texture_vert, 0);
   glCompileShader(vert);
   glGetShaderiv(vert, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
@@ -58,7 +58,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   }
   
   frag = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(frag, 1, (const GLchar *const*)&to_texture_frag, (GLint *)&to_texture_frag_len);
+  glShaderSource(frag, 1, (const GLchar *const*)&to_texture_frag, 0);
   glCompileShader(frag);
   glGetShaderiv(frag, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
