@@ -41,12 +41,12 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glGenFramebuffers(1, &buffer->framebuffer);
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
   glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, buffer->texture, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   if(glGetError() != GL_NO_ERROR
-     || glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+     || glCheckNamedFramebufferStatus(buffer->framebuffer, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
     errorcode = OPENGL_ERROR;
     goto fond_load_buffer_cleanup;
   }
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   vert = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vert, 1, (const GLchar *const*)&to_texture_vert, (GLint *)&to_texture_vert_len);
@@ -112,11 +112,16 @@ int fond_render(struct fond_buffer *buffer, char *text){
   }
 
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glUseProgram(buffer->program);
   glBindVertexArray(vao);
   glBindTexture(GL_TEXTURE_2D, buffer->font->texture);
-  glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
+  {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
+  }
+  glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);
+  glUseProgram(0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   if(glGetError() != GL_NO_ERROR){
