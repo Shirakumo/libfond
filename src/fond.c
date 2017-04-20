@@ -28,12 +28,12 @@ void fond_free(struct fond_font *font){
 }
 
 int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
-  size_t bytesize = 0, size = 0;
+  size_t size = 0;
 
   if(font->codepoints){
     for(; font->codepoints[size]; ++size);
   }else if(font->characters){
-    if(!fond_decode_utf8((void *)font->characters, &font->codepoints, 0)){
+    if(!fond_decode_utf8((void *)font->characters, &font->codepoints, &size)){
       return 0;
     }
     
