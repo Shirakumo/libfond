@@ -10,8 +10,6 @@
 #include "stb_truetype.h"
 #include "utf8.h"
 
-int errcode = 0;
-
 void fond_free(struct fond_font *font){
   if(font->texture)
     glDeleteTextures(1, &font->texture);
@@ -36,12 +34,12 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
     for(; font->characters[bytesize]; ++bytesize);
     font->codepoints = calloc(bytesize, sizeof(uint32_t));
     if(!font->codepoints){
-      errcode = OUT_OF_MEMORY;
+      errorcode = OUT_OF_MEMORY;
       goto fond_pack_range_cleanup;
     }
     
     if(!utf8_to_utf32((uint8_t *)font->characters, font->codepoints, bytesize, &size)){
-      errcode = UTF8_CONVERSION_ERROR;
+      errorcode = UTF8_CONVERSION_ERROR;
       goto fond_pack_range_cleanup;
     }
     
@@ -50,7 +48,7 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
   
   font->data = calloc(size, sizeof(stbtt_packedchar));
   if(!font->data){
-    errcode = OUT_OF_MEMORY;
+    errorcode = OUT_OF_MEMORY;
     goto fond_pack_range_cleanup;
   }
   
@@ -60,7 +58,7 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
   return 1;
 
  fond_pack_range_cleanup:
-  if(errcode == UTF8_CONVERSION_ERROR){
+  if(errorcode == UTF8_CONVERSION_ERROR){
     if(font->codepoints)
       free(font->codepoints);
     font->codepoints = 0;
@@ -78,14 +76,14 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   unsigned char atlasdata[font->width*font->height];
   
   if(!stbtt_PackBegin(&context, atlasdata, font->width, font->height, 0, 1, 0)){
-    errcode = FONT_PACK_FAILED;
+    errorcode = FONT_PACK_FAILED;
     goto fond_load_internal_cleanup;
   }
 
   stbtt_PackSetOversampling(&context, font->oversample_h, font->oversample_v);
 
   if(!stbtt_PackFontRanges(&context, fontdata, font->index, range, 1)){
-    errcode = FONT_PACK_FAILED;
+    errorcode = FONT_PACK_FAILED;
     goto fond_load_internal_cleanup;
   }
 
@@ -102,7 +100,7 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   glBindTexture(GL_TEXTURE_2D, 0);
 
   if(glGetError() != GL_NO_ERROR){
-    errcode = OPENGL_ERROR;
+    errorcode = OPENGL_ERROR;
     goto fond_load_internal_cleanup;
   }
   
@@ -120,7 +118,7 @@ int fond_load(struct fond_font *font){
   unsigned char *fontdata = fond_load_file(font->file);
   
   if(!fontdata){
-    errcode = FILE_LOAD_FAILED;
+    errorcode = FILE_LOAD_FAILED;
     goto fond_load_cleanup;
   }
 
@@ -150,7 +148,7 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   unsigned char *fontdata = fond_load_file(font->file);
 
   if(!fontdata){
-    errcode = FILE_LOAD_FAILED;
+    errorcode = FILE_LOAD_FAILED;
     goto fond_load_fit_cleanup;
   }
 
@@ -165,7 +163,7 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
     if(fond_load_internal(font, fontdata, &range))
       return 1;
 
-    switch(errcode){
+    switch(errorcode){
     case FILE_LOAD_FAILED:
     case OUT_OF_MEMORY:
       goto fond_load_fit_cleanup;
@@ -175,7 +173,7 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
     }
   }
   
-  errcode = SIZE_EXCEEDED;
+  errorcode = SIZE_EXCEEDED;
 
  fond_load_fit_cleanup:
   if(fontdata)
@@ -200,7 +198,7 @@ int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *
   stbtt_aligned_quad quad = {0};
   int index = fond_codepoint_index(font, glyph);
   if(index < 0){
-    errcode = UNLOADED_GLYPH;
+    errorcode = UNLOADED_GLYPH;
     return 1;
   }
   
@@ -228,7 +226,7 @@ int fond_compute_glyph(struct fond_font *font, uint32_t glyph, float *x, float *
 
 int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, float *_y, GLuint *_vao){
   if(!font->data){
-    errcode = NOT_LOADED;
+    errorcode = NOT_LOADED;
     return 0;
   }
 
@@ -236,7 +234,7 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
   for(; text[bytesize]; ++bytesize);
   uint32_t codepoints[bytesize];
   if(!utf8_to_utf32((uint8_t *)text, codepoints, bytesize, &size)){
-    errcode = UTF8_CONVERSION_ERROR;
+    errorcode = UTF8_CONVERSION_ERROR;
     return 0;
   }
   
@@ -278,7 +276,7 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
 
   if(glGetError() != GL_NO_ERROR){
     glDeleteVertexArrays(1, vao);
-    errcode = OPENGL_ERROR;
+    errorcode = OPENGL_ERROR;
     return 0;
   }
 

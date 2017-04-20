@@ -11,7 +11,7 @@ int errorcode = 0;
 unsigned char *fond_load_file(char *file){
   unsigned int size = 512;
 
-  FILE *fp = fopen(file, "r");
+  FILE *fd = fopen(file, "r");
   if(!fd) return 0;
 
   struct stat finfo;
@@ -29,7 +29,7 @@ unsigned char *fond_load_file(char *file){
 }
 
 int fond_error(){
-  return errcode;
+  return errorcode;
 }
 
 char *font_error_string(int error){

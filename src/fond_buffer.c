@@ -13,12 +13,13 @@ void fond_free_buffer(struct fond_buffer *buffer){
   buffer->program = 0;
 
   if(buffer->framebuffer)
-    glDeleteFramebuffer(buffer->framebuffer);
+    glDeleteFramebuffers(1, &buffer->framebuffer);
   buffer->framebuffer = 0;
 }
 
 int fond_load_buffer(struct fond_buffer *buffer){
-  GLUint vert = 0, frag = 0, res = 0;
+  GLuint vert = 0, frag = 0;
+  GLint res = 0;
   
   if(buffer->width == 0)
     buffer->width = 512;
@@ -48,7 +49,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   vert = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vert, to_texture.vert.h);
+  glShaderSource(vert, 1, (const GLchar *const*)&to_texture_vert, (GLint *)&to_texture_vert_len);
   glCompileShader(vert);
   glGetShaderiv(vert, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
@@ -57,7 +58,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   }
   
   frag = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(frag, to_texture.frag.h);
+  glShaderSource(frag, 1, (const GLchar *const*)&to_texture_frag, (GLint *)&to_texture_frag_len);
   glCompileShader(frag);
   glGetShaderiv(frag, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
@@ -69,7 +70,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glAttachShader(buffer->program, vert);
   glAttachShader(buffer->program, frag);
   glLinkProgram(buffer->program);
-  glGetProgramiv(buffer->program GL_LINK_STATUS);
+  glGetProgramiv(buffer->program, GL_LINK_STATUS, &res);
   if(res == GL_FALSE){
     errorcode = OPENGL_ERROR;
     goto fond_load_buffer_cleanup;
@@ -86,7 +87,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   buffer->texture = 0;
 
   if(buffer->framebuffer)
-    glDeleteFramebuffer(buffer->framebuffer);
+    glDeleteFramebuffers(1, &buffer->framebuffer);
   buffer->framebuffer = 0;
   
   if(vert)
@@ -104,7 +105,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
 int fond_render(struct fond_buffer *buffer, char *text){
   float x, y;
   size_t n;
-  GLuint vao = 0
+  GLuint vao = 0;
 
   if(!fond_compute(buffer->font, text, &n, &x, &y, &vao)){
     return 0;
