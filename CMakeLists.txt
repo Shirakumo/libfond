@@ -33,16 +33,16 @@ endforeach()
 
 ## Main Library
 file(GLOB lib_src "src/*.c")
-add_library(fond_lib SHARED ${lib_src})
-set_property(TARGET fond_lib PROPERTY C_STANDARD 99)
-target_link_libraries(fond_lib ${OPENGL_LIBRARIES})
+add_library(fond SHARED ${lib_src})
+set_property(TARGET fond PROPERTY C_STANDARD 99)
+target_link_libraries(fond ${OPENGL_LIBRARIES})
 
 ## Test Program
 if(GLFW_FOUND AND GLEW_FOUND)
   file(GLOB test_src "test/*.c")
   add_executable(fond_test ${test_src})
   set_property(TARGET fond_test PROPERTY C_STANDARD 99)
-  target_link_libraries(fond_test fond_lib ${GLFW_LIBRARIES} ${GLEW_LIBRARIES})
+  target_link_libraries(fond_test fond ${GLFW_LIBRARIES} ${GLEW_LIBRARIES})
 endif()
 
 ## Warnings
@@ -52,4 +52,4 @@ elseif(CMAKE_BUILD_TOOL MATCHES "(gcc|clang)")
   add_definitions(-W -Wall -Wextra -pedantic)
 endif()
 
-install(TARGETS fond_lib DESTINATION /usr/local/lib)
+install(TARGETS fond DESTINATION /usr/local/lib)
