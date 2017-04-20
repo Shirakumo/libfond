@@ -68,7 +68,8 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
     goto fond_load_internal_cleanup;
   }
 
-  stbtt_PackSetOversampling(&context, font->oversample_h, font->oversample_v);
+  if(0 < font->oversample_h && 0 < font->oversample_v)
+    stbtt_PackSetOversampling(&context, font->oversample_h, font->oversample_v);
 
   if(!stbtt_PackFontRanges(&context, fontdata, font->index, range, 1)){
     errorcode = FONT_PACK_FAILED;
