@@ -279,7 +279,7 @@ int fond_compute(struct fond_font *font, char *text, unsigned int *_n, float *_x
   glBindVertexArray(0);
 
   if(glGetError() != GL_NO_ERROR){
-    glDeleteArrays(1, vao);
+    glDeleteVertexArrays(1, vao);
     errcode = OPENGL_ERROR;
     return 0;
   }
