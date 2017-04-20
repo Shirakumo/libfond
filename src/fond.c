@@ -266,7 +266,7 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
     return 0;
   }
 
-  *_n = i*2;
+  *_n = i*2*3;
   *_x = x;
   *_y = y;
   *_vao = vao[0];
