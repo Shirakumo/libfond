@@ -15,7 +15,7 @@ unsigned char *fond_load_file(char *file){
   if(!fd) return 0;
 
   struct stat finfo;
-  if(fstat(fd, &finfo)) return 0;
+  if(fstat(fileno(fd), &finfo)) return 0;
   
   unsigned char *data = calloc(finfo.st_size, sizeof(char));
   if(!data) return 0;
@@ -32,7 +32,7 @@ int fond_error(){
   return errorcode;
 }
 
-char *font_error_string(int error){
+char *fond_error_string(int error){
   switch(error){
   case NO_ERROR:
     return "No error has occurred yet.";
