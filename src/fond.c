@@ -242,12 +242,12 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*3*size, vert, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3+2)*sizeof(float), (GLvoid*)0);
   glEnableVertexAttribArray(0);
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*2*size, tex, GL_STATIC_DRAW);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (3+2)*sizeof(float), (GLvoid*)(3*sizeof(float)));
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
