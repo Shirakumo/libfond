@@ -127,8 +127,10 @@ int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float 
   {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    //glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
   }
+  glBindTexture(GL_TEXTURE_2D, buffer->texture);
+  glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);
   glUseProgram(0);
