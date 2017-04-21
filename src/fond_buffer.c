@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "fond_common.h"
 #include "fond.h"
 #include "shader/to_texture.vert.h"
@@ -37,17 +38,17 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
   if(glGetError() != GL_NO_ERROR){
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
   glGenFramebuffers(1, &buffer->framebuffer);
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, buffer->texture, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buffer->texture, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   if(glGetError() != GL_NO_ERROR
      || glCheckNamedFramebufferStatus(buffer->framebuffer, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
@@ -56,7 +57,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glCompileShader(vert);
   glGetShaderiv(vert, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
   
@@ -65,7 +66,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glCompileShader(frag);
   glGetShaderiv(frag, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
@@ -75,13 +76,13 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glLinkProgram(buffer->program);
   glGetProgramiv(buffer->program, GL_LINK_STATUS, &res);
   if(res == GL_FALSE){
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
-  
+
+  fond_err(NO_ERROR);
   glDeleteShader(vert);
   glDeleteShader(frag);
-
   return 1;
 
  fond_load_buffer_cleanup:
@@ -105,23 +106,28 @@ int fond_load_buffer(struct fond_buffer *buffer){
   return 0;
 }
 
-int fond_render(struct fond_buffer *buffer, char *text){
-  float x, y;
+int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float *color){
   size_t n;
-  GLuint vao = 0;
-
-  if(!fond_compute(buffer->font, text, &n, &x, &y, &vao)){
+  GLuint vao = 0, size_u = 0, color_u = 0;
+  
+  if(!fond_compute_u(buffer->font, text, size, &n, &vao)){
     return 0;
   }
-
+  
+  size_u = glGetUniformLocation(buffer->program, "size");
+  color_u = glGetUniformLocation(buffer->program, "text_color");
+  
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
+  glViewport(0, 0, buffer->width, buffer->height);
   glUseProgram(buffer->program);
   glBindVertexArray(vao);
   glBindTexture(GL_TEXTURE_2D, buffer->font->atlas);
+  glUniform2ui(size_u, buffer->width, buffer->height);
+  if(color) glUniform3f(color_u, color[0], color[1], color[2]);
   {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, 0);
   }
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);
@@ -130,10 +136,11 @@ int fond_render(struct fond_buffer *buffer, char *text){
 
   if(glGetError() != GL_NO_ERROR){
     glDeleteVertexArrays(1, &vao);
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     return 0;
   }
   
+  fond_err(NO_ERROR);
   glDeleteVertexArrays(1, &vao);
   return 1;
 }

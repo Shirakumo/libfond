@@ -22,9 +22,9 @@ void fond_free(struct fond_font *font){
   font->codepoints = 0;
   font->converted_codepoints = 0;
   
-  if(font->data)
-    free(font->data);
-  font->data = 0;
+  if(font->chardata)
+    free(font->chardata);
+  font->chardata = 0;
 }
 
 int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
@@ -39,23 +39,24 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
     
     font->converted_codepoints = 1;
   }else{
-    errorcode = NO_CHARACTERS_OR_CODEPOINTS;
+    fond_err(NO_CHARACTERS_OR_CODEPOINTS);
     return 0;
   }
   
-  font->data = calloc(size, sizeof(stbtt_packedchar));
-  if(!font->data){
-    if(font->data)
-      free(font->data);
-    font->data = 0;
-    errorcode = OUT_OF_MEMORY;
+  font->chardata = calloc(size, sizeof(stbtt_packedchar));
+  if(!font->chardata){
+    if(font->chardata)
+      free(font->chardata);
+    font->chardata = 0;
+    fond_err(OUT_OF_MEMORY);
     return 0;
   }
   
+  fond_err(NO_ERROR);
   range->font_size = font->size;
   range->array_of_unicode_codepoints = (int *)font->codepoints;
   range->num_chars = size;
-  range->chardata_for_range = font->data;
+  range->chardata_for_range = font->chardata;
   return 1;
 }
 
@@ -63,16 +64,23 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   stbtt_pack_context context = {0};
   unsigned char atlasdata[font->width*font->height];
   
+  font->fontinfo = calloc(1, sizeof(stbtt_fontinfo));
+
+  if(!stbtt_InitFont(font->fontinfo, fontdata, stbtt_GetFontOffsetForIndex(fontdata, font->index))){
+    fond_err(FONT_INIT_FAILED);
+    goto fond_load_internal_cleanup;
+  }
+  
   if(!stbtt_PackBegin(&context, atlasdata, font->width, font->height, 0, 1, 0)){
-    errorcode = FONT_PACK_FAILED;
+    fond_err(FONT_PACK_FAILED);
     goto fond_load_internal_cleanup;
   }
 
-  if(0 < font->oversample_h && 0 < font->oversample_v)
-    stbtt_PackSetOversampling(&context, font->oversample_h, font->oversample_v);
+  if(0 < font->oversample)
+    stbtt_PackSetOversampling(&context, font->oversample, font->oversample);
 
   if(!stbtt_PackFontRanges(&context, fontdata, font->index, range, 1)){
-    errorcode = FONT_PACK_FAILED;
+    fond_err(FONT_PACK_FAILED);
     goto fond_load_internal_cleanup;
   }
 
@@ -84,18 +92,23 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, atlasdata);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, atlasdata);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   if(glGetError() != GL_NO_ERROR){
-    errorcode = OPENGL_ERROR;
+    fond_err(OPENGL_ERROR);
     goto fond_load_internal_cleanup;
   }
   
+  fond_err(NO_ERROR);
   return 1;
 
  fond_load_internal_cleanup:
+  if(font->fontinfo)
+    free(font->fontinfo);
+  font->fontinfo = 0;
+  
   if(font->atlas)
     glDeleteTextures(1, &font->atlas);
   font->atlas = 0;
@@ -107,7 +120,7 @@ int fond_load(struct fond_font *font){
   unsigned char *fontdata = fond_load_file(font->file);
   
   if(!fontdata){
-    errorcode = FILE_LOAD_FAILED;
+    fond_err(FILE_LOAD_FAILED);
     goto fond_load_cleanup;
   }
 
@@ -125,9 +138,9 @@ int fond_load(struct fond_font *font){
   if(fontdata)
     free(fontdata);
 
-  if(font->data)
-    free(font->data);
-  font->data = 0;
+  if(font->chardata)
+    free(font->chardata);
+  font->chardata = 0;
 
   return 0;
 }
@@ -137,7 +150,7 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   unsigned char *fontdata = fond_load_file(font->file);
 
   if(!fontdata){
-    errorcode = FILE_LOAD_FAILED;
+    fond_err(FILE_LOAD_FAILED);
     goto fond_load_fit_cleanup;
   }
 
@@ -149,8 +162,9 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   if(font->height == 0) font->height = 64;
   
   while(font->width < max_size){
-    if(fond_load_internal(font, fontdata, &range))
+    if(fond_load_internal(font, fontdata, &range)){
       return 1;
+    }
 
     switch(errorcode){
     case FILE_LOAD_FAILED:
@@ -162,15 +176,15 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
     }
   }
   
-  errorcode = SIZE_EXCEEDED;
+  fond_err(SIZE_EXCEEDED);
 
  fond_load_fit_cleanup:
   if(fontdata)
     free(fontdata);
 
-  if(font->data)
-    free(font->data);
-  font->data = 0;
+  if(font->chardata)
+    free(font->chardata);
+  font->chardata = 0;
 
   return 0;
 }
@@ -183,49 +197,42 @@ int fond_codepoint_index(struct fond_font *font, uint32_t glyph){
   return -1;
 }
 
-int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, float *_y, GLuint *_vao){
-  size_t size = 0;
-  int32_t *codepoints = 0;
+int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_n, GLuint *_vao){
   GLfloat *vert = 0;
   GLuint *ind = 0;
   GLuint vao = 0, vbo = 0, ebo = 0;
   float x = 0, y = 0;
   
-  if(!font->data){
-    errorcode = NOT_LOADED;
+  if(!font->chardata){
+    fond_err(NOT_LOADED);
     goto fond_compute_cleanup;
   }
 
-  if(!fond_decode_utf8((void *)text, &codepoints, &size)){
-    goto fond_compute_cleanup;
-  }
-
-  vert = calloc(4*(3+2)*size, sizeof(GLfloat));
+  vert = calloc(4*4*size, sizeof(GLfloat));
   ind = calloc(2*3*size, sizeof(GLuint));
   if(!vert || !ind){
-    errorcode = OUT_OF_MEMORY;
+    fond_err(OUT_OF_MEMORY);
     goto fond_compute_cleanup;
   }
 
   for(size_t i=0; i<size; ++i){
     stbtt_aligned_quad quad = {0};
-    int index = fond_codepoint_index(font, codepoints[i]);
+    int index = fond_codepoint_index(font, text[i]);
     if(index < 0){
-      errorcode = UNLOADED_GLYPH;
+      fond_err(UNLOADED_GLYPH);
       goto fond_compute_cleanup;
     }
   
-    stbtt_GetPackedQuad((stbtt_packedchar *)font->data, font->width, font->height, index, &x, &y, &quad, 1);
-
-    int vi = 4*(3+2)*i;
-    vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = quad.s0; vert[vi++] = quad.t1;
-    vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = quad.s0; vert[vi++] = quad.t0;
-    vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = quad.s1; vert[vi++] = quad.t0;
-    vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = quad.s1; vert[vi++] = quad.t1;
+    stbtt_GetPackedQuad((stbtt_packedchar *)font->chardata, font->width, font->height, index, &x, &y, &quad, 1);
+    int vi = 4*4*i;
+    vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = quad.s0; vert[vi++] = quad.t1;
+    vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = quad.s0; vert[vi++] = quad.t0;
+    vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = quad.s1; vert[vi++] = quad.t0;
+    vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = quad.s1; vert[vi++] = quad.t1;
   
     int ii = 2*3*i;
-    ind[ii++] = i; ind[ii++] = i+1; ind[ii++] = i+2;
-    ind[ii++] = i; ind[ii++] = i+2; ind[ii++] = i+3;
+    ind[ii++] = i*4+0; ind[ii++] = i*4+1; ind[ii++] = i*4+3;
+    ind[ii++] = i*4+1; ind[ii++] = i*4+2; ind[ii++] = i*4+3;
   }
 
   glGenVertexArrays(1, &vao);
@@ -235,10 +242,10 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
   glBindVertexArray(vao);
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*(3+2)*size, vert, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*(3+2), (GLvoid*)0);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*4*size, vert, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)0);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*(3+2), (GLvoid*)(3*sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)(2*sizeof(float)));
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -249,31 +256,21 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   if(glGetError() != GL_NO_ERROR){
-    errorcode = OPENGL_ERROR;
+    glDeleteVertexArrays(1, &vao);
+    fond_err(OPENGL_ERROR);
     goto fond_compute_cleanup;
   }
 
-  free(codepoints);
-  glDeleteBuffers(1, &vbo);
-  glDeleteBuffers(1, &ebo);
+  fond_err(NO_ERROR);
   *_n = 2*3*size;
-  *_x = x;
-  *_y = y;
   *_vao = vao;
-  return 1;
 
  fond_compute_cleanup:
-  if(codepoints)
-    free(codepoints);
-
   if(vert)
     free(vert);
 
   if(ind)
     free(ind);
-
-  if(vao)
-    glDeleteVertexArrays(1, &vao);
 
   if(vbo)
     glDeleteBuffers(2, &vbo);
@@ -282,4 +279,31 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, float *_x, floa
     glDeleteBuffers(2, &ebo);
 
   return (errorcode == NO_ERROR);
+}
+
+int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
+  if(!text[0]){
+    return 1;
+  }
+
+  int ascent, descent, linegap;
+  stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
+  float scale = font->size / (ascent - descent);
+
+  int advance, bearing;
+  stbtt_GetCodepointHMetrics(font->fontinfo, text[0], &advance, &bearing);
+  extent->r = advance;
+  extent->l = bearing;
+  for(size_t i=1; i<size; ++i){
+    extent->r += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]);
+    stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
+    extent->r += advance;
+  }
+
+  fond_err(NO_ERROR);
+  extent->l *= scale;
+  extent->r *= scale;
+  extent->t *= scale;
+  extent->b *= scale;
+  return 1;
 }

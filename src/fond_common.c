@@ -11,14 +11,14 @@ int errorcode = 0;
 
 int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
   if(utf8valid(string)){
-    errorcode = UTF8_CONVERSION_ERROR;
+    fond_err(UTF8_CONVERSION_ERROR);
     return 0;
   }
   
   size_t size = utf8len(string);
   int32_t *decoded = calloc(size, sizeof(uint32_t));
   if(!decoded){
-    errorcode = OUT_OF_MEMORY;
+    fond_err(OUT_OF_MEMORY);
     return 0;
   }
   
@@ -29,6 +29,45 @@ int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
   *_decoded = decoded;
   if(_size) *_size = size;
   return 1;
+}
+
+int fond_compute(struct fond_font *font, char *text, size_t *_n, GLuint *_vao){
+  size_t size = 0;
+  int32_t *codepoints = 0;
+  
+  if(!fond_decode_utf8((void *)text, &codepoints, &size)){
+    return 0;
+  }
+
+  fond_compute_u(font, codepoints, size, _n, _vao);
+  free(codepoints);
+  return (errorcode == NO_ERROR);
+}
+
+int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent){
+  size_t size = 0;
+  int32_t *codepoints = 0;
+  
+  if(!fond_decode_utf8((void *)text, &codepoints, &size)){
+    return 0;
+  }
+
+  fond_compute_extent_u(font, codepoints, size, extent);
+  free(codepoints);
+  return (errorcode == NO_ERROR);
+}
+
+int fond_render(struct fond_buffer *buffer, char *text, float *color){
+  size_t size = 0;
+  int32_t *codepoints = 0;
+  
+  if(!fond_decode_utf8((void *)text, &codepoints, &size)){
+    return 0;
+  }
+
+  fond_render_u(buffer, codepoints, size, color);
+  free(codepoints);
+  return (errorcode == NO_ERROR);
 }
 
 unsigned char *fond_load_file(char *file){
@@ -51,6 +90,10 @@ unsigned char *fond_load_file(char *file){
   return data;
 }
 
+void fond_err(int code){
+  errorcode = code;
+}
+
 int fond_error(){
   return errorcode;
 }
@@ -65,6 +108,8 @@ char *fond_error_string(int error){
     return "Allocation failure due to heap exhaustion.";
   case FONT_PACK_FAILED:
     return "Failed to pack the font. The atlas size was too small or the font file was invalid.";
+  case FONT_INIT_FAILED:
+    return "Failed to initialize the font. The font file was likely invalid.";
   case OPENGL_ERROR:
     return "An OpenGL error has been encountered.";
   case SIZE_EXCEEDED:

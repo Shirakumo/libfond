@@ -19,6 +19,20 @@ extern "C" {
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
+
+  enum fond_error{
+    NO_ERROR,
+    FILE_LOAD_FAILED,
+    OUT_OF_MEMORY,
+    FONT_PACK_FAILED,
+    FONT_INIT_FAILED,
+    OPENGL_ERROR,
+    SIZE_EXCEEDED,
+    NOT_LOADED,
+    UTF8_CONVERSION_ERROR,
+    UNLOADED_GLYPH,
+    NO_CHARACTERS_OR_CODEPOINTS
+  };
   
   struct fond_font{
     // Font info
@@ -29,10 +43,11 @@ extern "C" {
     int32_t *codepoints;
     // Buffer info
     unsigned int width, height;
-    unsigned int oversample_h, oversample_v;
+    unsigned int oversample;
     GLuint atlas;
     // Internal data
-    void *data;
+    void *chardata;
+    void *fontinfo;
     int converted_codepoints;
   };
 
@@ -44,28 +59,24 @@ extern "C" {
     GLuint program, framebuffer;
   };
 
-  enum fond_error{
-    NO_ERROR,
-    FILE_LOAD_FAILED,
-    OUT_OF_MEMORY,
-    FONT_PACK_FAILED,
-    OPENGL_ERROR,
-    SIZE_EXCEEDED,
-    NOT_LOADED,
-    UTF8_CONVERSION_ERROR,
-    UNLOADED_GLYPH,
-    NO_CHARACTERS_OR_CODEPOINTS
+  struct fond_extent{
+    float l, r, t, b;
   };
 
   void fond_free(struct fond_font *font);
   int fond_load(struct fond_font *font);
   int fond_load_fit(struct fond_font *font, unsigned int max_size);
-  int fond_compute(struct fond_font *font, char *text, size_t *n, float *x, float *y, GLuint *vao);
+  int fond_compute(struct fond_font *font, char *text, size_t *n, GLuint *vao);
+  int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, GLuint *vao);
+  int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent);
+  int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent);
 
   void fond_free_buffer(struct fond_buffer *buffer);
   int fond_load_buffer(struct fond_buffer *buffer);
-  int fond_render(struct fond_buffer *buffer, char *text);
-  
+  int fond_render(struct fond_buffer *buffer, char *text, float *color);
+  int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float *color);
+
+  int fond_decode_utf8(void *string, int32_t **decoded, size_t *size);
   int fond_error();
   char *fond_error_string(int error);
   

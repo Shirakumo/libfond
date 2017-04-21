@@ -25,11 +25,12 @@ const GLchar *fragment_shader = "#version 330 core\n"
 
 int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
   font->file = file;
-  font->size = 12.0;
+  font->size = 40.0;
+  font->oversample = 2;
   font->characters =
     "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    " 0123456789.-;:?!/()😺";
+    " 0123456789.-;:?!/()äöü";
   
   printf("Loading font... ");
   if(!fond_load_fit(font, 2048))
@@ -37,15 +38,15 @@ int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
   printf("DONE (Atlas %ix%i)\n", font->width, font->height);
 
   buffer->font = font;
-  buffer->width = 256;
-  buffer->height = 256;
+  buffer->width = 512;
+  buffer->height = 512;
   printf("Loading buffer... ");
   if(!fond_load_buffer(buffer))
     return 0;
   printf("DONE\n");
 
   printf("Rendering buffer... ");
-  if(!fond_render(buffer, "Hello Everynyan! 😺"))
+  if(!fond_render(buffer, "Grüezi Mitenander!", 0))
     return 0;
   printf("DONE\n");
   
@@ -89,9 +90,8 @@ int main(int argc, char **argv){
     goto main_cleanup;
   }
 
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  glViewport(0, 0, width, height);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   GLuint vert, frag, program, vbo, ebo, vao;
   vert = glCreateShader(GL_VERTEX_SHADER);
@@ -149,6 +149,10 @@ int main(int argc, char **argv){
     printf("Error: %s\n", fond_error_string(fond_error()));
     goto main_cleanup;
   }
+
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
   
   while(!glfwWindowShouldClose(window)){
     glfwPollEvents();
