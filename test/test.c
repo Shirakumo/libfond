@@ -23,14 +23,23 @@ const GLchar *fragment_shader = "#version 330 core\n"
   "  color = texture(tex_image, texcoord);\n"
   "}\n";
 
-int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
+struct data{
+  struct fond_buffer *buffer;
+  int32_t text[500];
+  size_t pos;
+};
+
+int load_stuff(char *file, struct data *data){
+  struct fond_buffer *buffer = data->buffer;
+  struct fond_font *font = buffer->font;
+  
   font->file = file;
-  font->size = 40.0;
+  font->size = 100.0;
   font->oversample = 2;
   font->characters =
     "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    " 0123456789.-;:?!/()äöü";
+    " 0123456789.-;:?!/()*+^_\\";
   
   printf("Loading font... ");
   GLint max_size = 0;
@@ -48,11 +57,37 @@ int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
   printf("DONE\n");
 
   printf("Rendering buffer... ");
-  if(!fond_render(buffer, "Grüezi Mitenander!", 0))
+  if(!fond_render(buffer, "type", 0))
     return 0;
   printf("DONE\n");
   
   return 1;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode){
+  struct data *data = glfwGetWindowUserPointer(window);
+  if(action == GLFW_RELEASE){
+    switch(key){
+    case GLFW_KEY_BACKSPACE:
+      if(0 < data->pos){
+        data->pos--;
+        fond_render_u(data->buffer, data->text, data->pos, 0);
+      }
+      break;
+    case GLFW_KEY_ESCAPE:
+      glfwSetWindowShouldClose(window, GL_TRUE);
+      break;
+    }
+  }
+}
+
+void character_callback(GLFWwindow* window, unsigned int codepoint){
+  struct data *data = glfwGetWindowUserPointer(window);
+  if(data->pos < 500){
+    data->text[data->pos] = (int32_t)codepoint;
+    data->pos++;
+    fond_render_u(data->buffer, data->text, data->pos, 0);
+  }
 }
 
 void render(GLuint program, GLuint vao, struct fond_buffer *buffer){
@@ -85,6 +120,8 @@ int main(int argc, char **argv){
     goto main_cleanup;
   }
   glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, key_callback);
+  glfwSetCharCallback(window, character_callback);
 
   glewExperimental = GL_TRUE;
   if(glewInit() != GLEW_OK){
@@ -145,9 +182,16 @@ int main(int argc, char **argv){
   }
   printf("DONE\n");
 
+  // Construct data and tie it.
+  struct data data = {0};
   struct fond_font font = {0};
   struct fond_buffer buffer = {0};
-  if(!load_stuff(argv[1], &font, &buffer)){
+  data.buffer = &buffer;
+  buffer.font = &font;
+  
+  glfwSetWindowUserPointer(window, &data);
+  
+  if(!load_stuff(argv[1], &data)){
     printf("Error: %s\n", fond_error_string(fond_error()));
     goto main_cleanup;
   }
