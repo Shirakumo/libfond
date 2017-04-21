@@ -33,13 +33,15 @@ int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
     " 0123456789.-;:?!/()äöü";
   
   printf("Loading font... ");
-  if(!fond_load_fit(font, 2048))
+  GLint max_size = 0;
+  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
+  if(!fond_load_fit(font, max_size))
     return 0;
   printf("DONE (Atlas %ix%i)\n", font->width, font->height);
 
   buffer->font = font;
-  buffer->width = 512;
-  buffer->height = 512;
+  buffer->width = 800;
+  buffer->height = 600;
   printf("Loading buffer... ");
   if(!fond_load_buffer(buffer))
     return 0;
@@ -108,10 +110,10 @@ int main(int argc, char **argv){
   glLinkProgram(program);
 
   GLfloat vertices[] = {
-     0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, 0.0f,  0.0f, 1.0f
+     1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+     1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f
   };
   GLuint indices[] = {
     0, 1, 3,
