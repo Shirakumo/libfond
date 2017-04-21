@@ -29,7 +29,7 @@ int load_stuff(char *file, struct fond_font *font, struct fond_buffer *buffer){
   font->characters =
     "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "0123456789.-;:?!/()😺";
+    " 0123456789.-;:?!/()😺";
   
   printf("Loading font... ");
   if(!fond_load_fit(font, 2048))
