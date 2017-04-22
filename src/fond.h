@@ -42,10 +42,12 @@ extern "C" {
     char *characters;
     int32_t *codepoints;
     // Buffer info
-    unsigned int width, height;
+    unsigned int width;
+    unsigned int height;
     unsigned int oversample;
     GLuint atlas;
     // Internal data
+    void *fontdata;
     void *chardata;
     void *fontinfo;
     int converted_codepoints;
@@ -54,13 +56,19 @@ extern "C" {
   struct fond_buffer{
     struct fond_font *font;
     GLuint texture;
-    unsigned int width, height;
+    unsigned int width;
+    unsigned int height;
     // Internal data
-    GLuint program, framebuffer;
+    GLuint program;
+    GLuint framebuffer;
   };
 
   struct fond_extent{
-    float l, r, t, b;
+    float l;
+    float r;
+    float t;
+    float b;
+    float gap;
   };
 
   void fond_free(struct fond_font *font);
