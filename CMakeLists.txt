@@ -8,8 +8,6 @@ find_package(GLFW)
 
 include_directories("src/")
 include_directories(${OPENGL_INCLUDE_DIRS})
-include_directories(${GLFW_INCLUDE_DIRS})
-include_directories(${GLEW_INCLUDE_DIRS})
 
 ## Generate Shader Headers
 add_custom_target(shaders ALL)
@@ -38,6 +36,8 @@ target_link_libraries(fond ${OPENGL_LIBRARIES})
 
 ## Test Program
 if(GLFW_FOUND AND GLEW_FOUND)
+  include_directories(${GLFW_INCLUDE_DIRS})
+  include_directories(${GLEW_INCLUDE_DIRS})
   file(GLOB test_src "test/*.c")
   add_executable(fond_test ${test_src})
   set_property(TARGET fond_test PROPERTY C_STANDARD 99)
