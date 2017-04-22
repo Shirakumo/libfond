@@ -25,6 +25,10 @@ void fond_free(struct fond_font *font){
   if(font->chardata)
     free(font->chardata);
   font->chardata = 0;
+
+  if(font->fontdata)
+    free(font->fontdata);
+  font->fontdata = 0;
 }
 
 int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
@@ -63,7 +67,8 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
 int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pack_range *range){
   stbtt_pack_context context = {0};
   unsigned char atlasdata[font->width*font->height];
-  
+
+  font->fontdata = fontdata;
   font->fontinfo = calloc(1, sizeof(stbtt_fontinfo));
 
   if(!stbtt_InitFont(font->fontinfo, fontdata, stbtt_GetFontOffsetForIndex(fontdata, font->index))){
@@ -85,7 +90,6 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   }
 
   stbtt_PackEnd(&context);
-  free(fontdata);
 
   glGenTextures(1, &font->atlas);
   glBindTexture(GL_TEXTURE_2D, font->atlas);
@@ -138,9 +142,6 @@ int fond_load(struct fond_font *font){
   return 1;
 
  fond_load_cleanup:
-  if(fontdata)
-    free(fontdata);
-
   if(font->chardata)
     free(font->chardata);
   font->chardata = 0;
@@ -182,9 +183,6 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   fond_err(SIZE_EXCEEDED);
 
  fond_load_fit_cleanup:
-  if(fontdata)
-    free(fontdata);
-
   if(font->chardata)
     free(font->chardata);
   font->chardata = 0;
