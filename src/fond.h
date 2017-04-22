@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #ifdef _MSC_VER
+#  include <windows.h>
 #  ifdef FOND_STATIC_DEFINE
 #    define FOND_EXPORT
 #  else
