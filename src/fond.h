@@ -81,12 +81,12 @@ extern "C" {
 
   void fond_free_buffer(struct fond_buffer *buffer);
   int fond_load_buffer(struct fond_buffer *buffer);
-  int fond_render(struct fond_buffer *buffer, char *text, float *color);
-  int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float *color);
+  int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float *color);
+  int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color);
 
   int fond_decode_utf8(void *string, int32_t **decoded, size_t *size);
-  int fond_error();
-  char *fond_error_string(int error);
+  enum fond_error fond_error();
+  char *fond_error_string(enum fond_error error);
   
 #ifdef __cplusplus
 }

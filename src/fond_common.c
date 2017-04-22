@@ -57,7 +57,7 @@ int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *
   return (errorcode == NO_ERROR);
 }
 
-int fond_render(struct fond_buffer *buffer, char *text, float *color){
+int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float *color){
   size_t size = 0;
   int32_t *codepoints = 0;
   
@@ -65,7 +65,7 @@ int fond_render(struct fond_buffer *buffer, char *text, float *color){
     return 0;
   }
 
-  fond_render_u(buffer, codepoints, size, color);
+  fond_render_u(buffer, codepoints, size, x, y, color);
   free(codepoints);
   return (errorcode == NO_ERROR);
 }
@@ -94,11 +94,11 @@ void fond_err(int code){
   errorcode = code;
 }
 
-int fond_error(){
+enum fond_error fond_error(){
   return errorcode;
 }
 
-char *fond_error_string(int error){
+char *fond_error_string(enum fond_error error){
   switch(error){
   case NO_ERROR:
     return "No error has occurred yet.";

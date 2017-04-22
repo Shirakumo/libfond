@@ -57,10 +57,20 @@ int load_stuff(char *file, struct data *data){
   printf("DONE\n");
 
   printf("Rendering buffer... ");
-  if(!fond_render(buffer, "type", 0))
+  if(!fond_render(buffer, "type", 0, 100, 0))
     return 0;
   printf("DONE\n");
   
+  return 1;
+}
+
+int render_text(struct data *data){
+  struct fond_extent extent = {0};
+  fond_compute_extent_u(data->buffer->font, 0, 0, &extent);
+  if(!fond_render_u(data->buffer, data->text, data->pos, 0, extent.t, 0)){
+    printf("Failed to render: %s\n", fond_error_string(fond_error()));
+    return 0;
+  }
   return 1;
 }
 
@@ -71,7 +81,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     case GLFW_KEY_BACKSPACE:
       if(0 < data->pos){
         data->pos--;
-        fond_render_u(data->buffer, data->text, data->pos, 0);
+        render_text(data);
       }
       break;
     case GLFW_KEY_ESCAPE:
@@ -86,7 +96,8 @@ void character_callback(GLFWwindow* window, unsigned int codepoint){
   if(data->pos < 500){
     data->text[data->pos] = (int32_t)codepoint;
     data->pos++;
-    fond_render_u(data->buffer, data->text, data->pos, 0);
+    if(!render_text(data))
+      data->pos--;
   }
 }
 

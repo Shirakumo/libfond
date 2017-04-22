@@ -109,15 +109,15 @@ int fond_load_buffer(struct fond_buffer *buffer){
   return 0;
 }
 
-int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float *color){
+int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color){
   size_t n;
-  GLuint vao = 0, size_u = 0, color_u = 0;
+  GLuint vao = 0, extent_u = 0, color_u = 0;
   
   if(!fond_compute_u(buffer->font, text, size, &n, &vao)){
     return 0;
   }
   
-  size_u = glGetUniformLocation(buffer->program, "size");
+  extent_u = glGetUniformLocation(buffer->program, "extent");
   color_u = glGetUniformLocation(buffer->program, "text_color");
   
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
@@ -125,7 +125,7 @@ int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float 
   glUseProgram(buffer->program);
   glBindVertexArray(vao);
   glBindTexture(GL_TEXTURE_2D, buffer->font->atlas);
-  glUniform2ui(size_u, buffer->width, buffer->height);
+  glUniform4f(extent_u, x, y, buffer->width, buffer->height);
   if(color) glUniform3f(color_u, color[0], color[1], color[2]);
   {
     glClearColor(0.0, 0.0, 0.0, 0.0);
