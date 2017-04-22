@@ -126,7 +126,7 @@ int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float 
   glBindVertexArray(vao);
   glBindTexture(GL_TEXTURE_2D, buffer->font->atlas);
   glUniform4f(extent_u, x, y, buffer->width, buffer->height);
-  if(color) glUniform3f(color_u, color[0], color[1], color[2]);
+  if(color) glUniform4f(color_u, color[0], color[1], color[2], color[3]);
   {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
