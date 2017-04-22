@@ -283,22 +283,23 @@ int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_
 }
 
 int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
-  if(!text[0]){
-    return 1;
-  }
-
   int ascent, descent, linegap;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
-
-  int advance, bearing;
-  stbtt_GetCodepointHMetrics(font->fontinfo, text[0], &advance, &bearing);
-  extent->r = advance;
-  extent->l = bearing;
-  for(size_t i=1; i<size; ++i){
-    extent->r += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]);
-    stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
-    extent->r += advance;
+  extent->t = ascent;
+  extent->b = -descent;
+  extent->gap = linegap;
+  
+  if(0 < size){
+    int advance, bearing;
+    stbtt_GetCodepointHMetrics(font->fontinfo, text[0], &advance, &bearing);
+    extent->r = advance;
+    extent->l = -bearing;
+    for(size_t i=1; i<size; ++i){
+      extent->r += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]);
+      stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
+      extent->r += advance;
+    }
   }
 
   fond_err(NO_ERROR);
@@ -306,5 +307,6 @@ int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, st
   extent->r *= scale;
   extent->t *= scale;
   extent->b *= scale;
+  extent->gap *= scale;
   return 1;
 }
