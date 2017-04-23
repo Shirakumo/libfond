@@ -66,7 +66,12 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
 
 int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
   stbtt_pack_context context = {0};
-  unsigned char atlasdata[font->width*font->height];
+  unsigned char *atlasdata = calloc(font->width*font->height, sizeof(char));
+
+  if(!atlasdata){
+    fond_err(OUT_OF_MEMORY);
+    goto fond_load_internal_cleanup;
+  }
 
   font->fontinfo = calloc(1, sizeof(stbtt_fontinfo));
 
@@ -111,6 +116,9 @@ int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
   return 1;
 
  fond_load_internal_cleanup:
+  if(atlasdata)
+    free(atlasdata);
+  
   if(font->fontinfo)
     free(font->fontinfo);
   font->fontinfo = 0;
