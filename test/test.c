@@ -218,6 +218,9 @@ int main(int argc, char **argv){
     
     glfwSwapBuffers(window);
   }
+  
+  fond_free(&font);
+  fond_free_buffer(&buffer);
 
  main_cleanup:
   glfwTerminate();
