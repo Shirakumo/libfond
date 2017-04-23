@@ -64,14 +64,13 @@ int fond_pack_range(struct fond_font *font, stbtt_pack_range *range){
   return 1;
 }
 
-int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pack_range *range){
+int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
   stbtt_pack_context context = {0};
   unsigned char atlasdata[font->width*font->height];
 
-  font->fontdata = fontdata;
   font->fontinfo = calloc(1, sizeof(stbtt_fontinfo));
 
-  if(!stbtt_InitFont(font->fontinfo, fontdata, stbtt_GetFontOffsetForIndex(fontdata, font->index))){
+  if(!stbtt_InitFont(font->fontinfo, font->fontdata, stbtt_GetFontOffsetForIndex(font->fontdata, font->index))){
     fond_err(FONT_INIT_FAILED);
     goto fond_load_internal_cleanup;
   }
@@ -84,7 +83,7 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
   if(0 < font->oversample)
     stbtt_PackSetOversampling(&context, font->oversample, font->oversample);
 
-  if(!stbtt_PackFontRanges(&context, fontdata, font->index, range, 1)){
+  if(!stbtt_PackFontRanges(&context, font->fontdata, font->index, range, 1)){
     fond_err(FONT_PACK_FAILED);
     goto fond_load_internal_cleanup;
   }
@@ -124,9 +123,8 @@ int fond_load_internal(struct fond_font *font, unsigned char *fontdata, stbtt_pa
 
 int fond_load(struct fond_font *font){
   stbtt_pack_range range = {0};
-  unsigned char *fontdata = fond_load_file(font->file);
   
-  if(!fontdata){
+  if(!fond_load_file(font->file, &font->fontdata)){
     fond_err(FILE_LOAD_FAILED);
     goto fond_load_cleanup;
   }
@@ -135,7 +133,7 @@ int fond_load(struct fond_font *font){
     goto fond_load_cleanup;
   }
 
-  if(!fond_load_internal(font, fontdata, &range)){
+  if(!fond_load_internal(font, &range)){
     goto fond_load_cleanup;
   }
 
@@ -146,14 +144,17 @@ int fond_load(struct fond_font *font){
     free(font->chardata);
   font->chardata = 0;
 
+  if(font->fontdata)
+    free(font->fontdata);
+  font->fontdata = 0;
+
   return 0;
 }
 
 int fond_load_fit(struct fond_font *font, unsigned int max_size){
   stbtt_pack_range range = {0};
-  unsigned char *fontdata = fond_load_file(font->file);
 
-  if(!fontdata){
+  if(!fond_load_file(font->file, &font->fontdata)){
     fond_err(FILE_LOAD_FAILED);
     goto fond_load_fit_cleanup;
   }
@@ -166,7 +167,7 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   if(font->height == 0) font->height = 64;
   
   while(font->width <= max_size){
-    if(fond_load_internal(font, fontdata, &range)){
+    if(fond_load_internal(font, &range)){
       return 1;
     }
 
@@ -186,6 +187,10 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
   if(font->chardata)
     free(font->chardata);
   font->chardata = 0;
+
+  if(font->fontdata)
+    free(font->fontdata);
+  font->fontdata = 0;
 
   return 0;
 }

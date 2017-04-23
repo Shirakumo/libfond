@@ -70,9 +70,7 @@ int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float 
   return (errorcode == NO_ERROR);
 }
 
-unsigned char *fond_load_file(char *file){
-  unsigned int size = 512;
-
+int fond_load_file(char *file, void **pointer){
   FILE *fd = fopen(file, "r");
   if(!fd) return 0;
 
@@ -86,8 +84,9 @@ unsigned char *fond_load_file(char *file){
     free(data);
     return 0;
   }
-  
-  return data;
+
+  *pointer = data;
+  return 1;
 }
 
 void fond_err(int code){

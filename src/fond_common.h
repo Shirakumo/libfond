@@ -6,6 +6,6 @@
 int errorcode;
 void fond_err(int code);
 
-unsigned char *fond_load_file(char *file);
+int fond_load_file(char *file, void **content);
 
 #endif
