@@ -172,7 +172,8 @@ int fond_load_fit(struct fond_font *font, unsigned int max_size){
     }
 
     switch(errorcode){
-    case FILE_LOAD_FAILED:
+    case FONT_INIT_FAILED:
+    case OPENGL_ERROR:
     case OUT_OF_MEMORY:
       goto fond_load_fit_cleanup;
     case FONT_PACK_FAILED:
