@@ -230,6 +230,11 @@ int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_
     goto fond_compute_cleanup;
   }
 
+  int ascent, descent, linegap;
+  stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
+  float scale = font->size / (ascent - descent);
+  float vskip = scale*(linegap+ascent-descent);
+
   for(size_t i=0; i<size; ++i){
     stbtt_aligned_quad quad = {0};
     int index = fond_codepoint_index(font, text[i]);
@@ -240,10 +245,19 @@ int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_
   
     stbtt_GetPackedQuad((stbtt_packedchar *)font->chardata, font->width, font->height, index, &x, &y, &quad, 1);
     int vi = 4*4*i;
-    vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = quad.s0; vert[vi++] = quad.t1;
-    vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = quad.s0; vert[vi++] = quad.t0;
-    vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = quad.s1; vert[vi++] = quad.t0;
-    vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = quad.s1; vert[vi++] = quad.t1;
+    if(text[i] == 0x000A){ // Linefeed
+      vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = 0;
+      vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = 0;
+      vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = 0;
+      vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = 0;
+      y += vskip;
+      x = 0;
+    }else{
+      vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = quad.s0; vert[vi++] = quad.t1;
+      vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = quad.s0; vert[vi++] = quad.t0;
+      vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = quad.s1; vert[vi++] = quad.t0;
+      vert[vi++] = quad.x1; vert[vi++] = -quad.y1; vert[vi++] = quad.s1; vert[vi++] = quad.t1;
+    }
   
     int ii = 2*3*i;
     ind[ii++] = i*4+0; ind[ii++] = i*4+1; ind[ii++] = i*4+3;
