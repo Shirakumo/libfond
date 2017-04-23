@@ -16,7 +16,7 @@ int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
   }
   
   size_t size = utf8len(string);
-  int32_t *decoded = calloc(size, sizeof(uint32_t));
+  int32_t *decoded = calloc(size+1, sizeof(uint32_t));
   if(!decoded){
     fond_err(OUT_OF_MEMORY);
     return 0;
