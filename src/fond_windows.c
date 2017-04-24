@@ -25,6 +25,8 @@ PFNGLCREATEPROGRAMPROC glCreateProgram = 0;
 PFNGLATTACHSHADERPROC glAttachShader = 0;
 PFNGLLINKPROGRAMPROC glLinkProgram = 0;
 PFNGLGETPROGRAMIVPROC glGetProgramiv = 0;
+PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog = 0;
+PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog = 0;
 PFNGLDELETESHADERPROC glDeleteShader = 0;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = 0;
 PFNGLUSEPROGRAMPROC glUseProgram = 0;
@@ -81,6 +83,10 @@ void fond_load_glext(){
       fprintf(stderr, "Failed to load glLinkProgram\n");
     if((glGetProgramiv = (PFNGLGETPROGRAMIVPROC) wglGetProcAddress("glGetProgramiv"))==0)
       fprintf(stderr, "Failed to load glGetProgramiv\n");
+    if((glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC) wglGetProcAddress("glGetShaderInfoLog"))==0)
+      fprintf(stderr, "Failed to load glGetShaderInfoLog\n");
+    if((glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC) wglGetProcAddress("glGetProgramInfoLog"))==0)
+      fprintf(stderr, "Failed to load glGetProgramInfoLog\n");
     if((glDeleteShader = (PFNGLDELETESHADERPROC) wglGetProcAddress("glDeleteShader"))==0)
       fprintf(stderr, "Failed to load glDeleteShader\n");
     if((glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC) wglGetProcAddress("glGetUniformLocation"))==0)

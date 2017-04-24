@@ -16,5 +16,7 @@
 int errorcode;
 void fond_err(int code);
 int fond_check_glerror();
+int fond_check_shader(GLuint shader);
+int fond_check_program(GLuint program);
 
 int fond_load_file(char *file, void **content);

@@ -22,7 +22,6 @@ FOND_EXPORT void fond_free_buffer(struct fond_buffer *buffer){
 
 FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   GLuint vert = 0, frag = 0;
-  GLint res = 0;
   
   if(buffer->width == 0)
     buffer->width = 512;
@@ -57,8 +56,7 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   vert = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vert, 1, &to_texture_vert_src, 0);
   glCompileShader(vert);
-  glGetShaderiv(vert, GL_COMPILE_STATUS, &res);
-  if(res == GL_FALSE){
+  if(!fond_check_shader(vert)){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
@@ -66,8 +64,7 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   frag = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(frag, 1, &to_texture_frag_src, 0);
   glCompileShader(frag);
-  glGetShaderiv(frag, GL_COMPILE_STATUS, &res);
-  if(res == GL_FALSE){
+  if(!fond_check_shader(frag)){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
@@ -76,8 +73,7 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   glAttachShader(buffer->program, vert);
   glAttachShader(buffer->program, frag);
   glLinkProgram(buffer->program);
-  glGetProgramiv(buffer->program, GL_LINK_STATUS, &res);
-  if(res == GL_FALSE){
+  if(!fond_check_program(buffer->program)){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }

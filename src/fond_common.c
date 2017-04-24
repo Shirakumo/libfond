@@ -101,6 +101,34 @@ int fond_check_glerror(){
   return 1;
 }
 
+int fond_check_shader(GLuint shader){
+  GLint res = 0;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &res);
+  if(res == GL_FALSE){
+    GLint length = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+    GLchar error[length];
+    glGetShaderInfoLog(shader, length, &length, &error[0]);
+    fprintf(stderr, "\nFond: GLSL error: %s\n", error);
+    return 0;
+  }
+  return 1;
+}
+
+int fond_check_program(GLuint program){
+  GLint res = 0;
+  glGetProgramiv(program, GL_LINK_STATUS, &res);
+  if(res == GL_FALSE){
+    GLint length = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+    GLchar error[length];
+    glGetProgramInfoLog(program, length, &length, &error[0]);
+    fprintf(stderr, "\nFond: GLSL error: %s\n", error);
+    return 0;
+  }
+  return 1;
+}
+
 FOND_EXPORT enum fond_error fond_error(){
   return errorcode;
 }
