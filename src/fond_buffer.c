@@ -41,7 +41,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
   if(glGetError() != GL_NO_ERROR){
-    fond_err(OPENGL_ERROR);
+    fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
@@ -51,7 +51,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   if(glGetError() != GL_NO_ERROR
      || glCheckNamedFramebufferStatus(buffer->framebuffer, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-    fond_err(OPENGL_ERROR);
+    fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
@@ -60,7 +60,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glCompileShader(vert);
   glGetShaderiv(vert, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
-    fond_err(OPENGL_ERROR);
+    fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
   
@@ -69,7 +69,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glCompileShader(frag);
   glGetShaderiv(frag, GL_COMPILE_STATUS, &res);
   if(res == GL_FALSE){
-    fond_err(OPENGL_ERROR);
+    fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
@@ -79,11 +79,11 @@ int fond_load_buffer(struct fond_buffer *buffer){
   glLinkProgram(buffer->program);
   glGetProgramiv(buffer->program, GL_LINK_STATUS, &res);
   if(res == GL_FALSE){
-    fond_err(OPENGL_ERROR);
+    fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
 
-  fond_err(NO_ERROR);
+  fond_err(FOND_NO_ERROR);
   glDeleteShader(vert);
   glDeleteShader(frag);
   return 1;
@@ -141,11 +141,11 @@ int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float 
 
   if(glGetError() != GL_NO_ERROR){
     glDeleteVertexArrays(1, &vao);
-    fond_err(OPENGL_ERROR);
+    fond_err(FOND_OPENGL_ERROR);
     return 0;
   }
   
-  fond_err(NO_ERROR);
+  fond_err(FOND_NO_ERROR);
   glDeleteVertexArrays(1, &vao);
   return 1;
 }
