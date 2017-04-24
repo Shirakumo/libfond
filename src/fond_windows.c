@@ -33,34 +33,62 @@ int loaded = 0;
 
 void fond_load_glext(){
   if(!loaded){
-    glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC) wglGetProcAddress("glGenerateMipmap");
-    glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC) wglGetProcAddress("glGenVertexArrays");
-    glGenBuffers = (PFNGLGENBUFFERSPROC) wglGetProcAddress("glGenBuffers");
-    glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC) wglGetProcAddress("glBindVertexArray");
-    glBindBuffer = (PFNGLBINDBUFFERPROC) wglGetProcAddress("glBindBuffer");
-    glBufferData = (PFNGLBUFFERDATAPROC) wglGetProcAddress("glBufferData");
-    glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC) wglGetProcAddress("glVertexAttribPointer");
-    glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC) wglGetProcAddress("glEnableVertexAttribArray");
-    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) wglGetProcAddress("glDeleteVertexArrays");
-    glDeleteBuffers = (PFNGLDELETEBUFFERSPROC) wglGetProcAddress("glDeleteBuffers");
-    glDeleteProgram = (PFNGLDELETEPROGRAMPROC) wglGetProcAddress("glDeleteProgram");
-    glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC) wglGetProcAddress("glDeleteFramebuffers");
-    glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC) wglGetProcAddress("glGenFramebuffers");
-    glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC) wglGetProcAddress("glBindFramebuffer");
-    glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC) wglGetProcAddress("glFramebufferTexture2D");
-    glCheckNamedFramebufferStatus = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC) wglGetProcAddress("glCheckNamedFramebufferStatus");
-    glCreateShader = (PFNGLCREATESHADERPROC) wglGetProcAddress("glCreateShader");
-    glShaderSource = (PFNGLSHADERSOURCEPROC) wglGetProcAddress("glShaderSource");
-    glCompileShader = (PFNGLCOMPILESHADERPROC) wglGetProcAddress("glCompileShader");
-    glGetShaderiv = (PFNGLGETSHADERIVPROC) wglGetProcAddress("glGetShaderiv");
-    glCreateProgram = (PFNGLCREATEPROGRAMPROC) wglGetProcAddress("glCreateProgram");
-    glAttachShader = (PFNGLATTACHSHADERPROC) wglGetProcAddress("glAttachShader");
-    glLinkProgram = (PFNGLLINKPROGRAMPROC) wglGetProcAddress("glLinkProgram");
-    glGetProgramiv = (PFNGLGETPROGRAMIVPROC) wglGetProcAddress("glGetProgramiv");
-    glDeleteShader = (PFNGLDELETESHADERPROC) wglGetProcAddress("glDeleteShader");
-    glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC) wglGetProcAddress("glGetUniformLocation");
-    glUseProgram = (PFNGLUSEPROGRAMPROC) wglGetProcAddress("glUseProgram");
-    glUniform4f = (PFNGLUNIFORM4FPROC) wglGetProcAddress("glUniform4f");
+    if((glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC) wglGetProcAddress("glGenerateMipmap"))==0)
+      fprintf(stderr, "Failed to load glGenerateMipmap\n");
+    if((glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC) wglGetProcAddress("glGenVertexArrays"))==0)
+      fprintf(stderr, "Failed to load glGenVertexArrays\n");
+    if((glGenBuffers = (PFNGLGENBUFFERSPROC) wglGetProcAddress("glGenBuffers"))==0)
+      fprintf(stderr, "Failed to load glGenBuffers\n");
+    if((glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC) wglGetProcAddress("glBindVertexArray"))==0)
+      fprintf(stderr, "Failed to load glBindVertexArray\n");
+    if((glBindBuffer = (PFNGLBINDBUFFERPROC) wglGetProcAddress("glBindBuffer"))==0)
+      fprintf(stderr, "Failed to load glBindBuffer\n");
+    if((glBufferData = (PFNGLBUFFERDATAPROC) wglGetProcAddress("glBufferData"))==0)
+      fprintf(stderr, "Failed to load glBufferData\n");
+    if((glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC) wglGetProcAddress("glVertexAttribPointer"))==0)
+      fprintf(stderr, "Failed to load glVertexAttribPointer\n");
+    if((glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC) wglGetProcAddress("glEnableVertexAttribArray"))==0)
+      fprintf(stderr, "Failed to load glEnableVertexAttribArray\n");
+    if((glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) wglGetProcAddress("glDeleteVertexArrays"))==0)
+      fprintf(stderr, "Failed to load glDeleteVertexArrays\n");
+    if((glDeleteBuffers = (PFNGLDELETEBUFFERSPROC) wglGetProcAddress("glDeleteBuffers"))==0)
+      fprintf(stderr, "Failed to load glDeleteBuffers\n");
+    if((glDeleteProgram = (PFNGLDELETEPROGRAMPROC) wglGetProcAddress("glDeleteProgram"))==0)
+      fprintf(stderr, "Failed to load glDeleteProgram\n");
+    if((glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC) wglGetProcAddress("glDeleteFramebuffers"))==0)
+      fprintf(stderr, "Failed to load glDeleteFramebuffers\n");
+    if((glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC) wglGetProcAddress("glGenFramebuffers"))==0)
+      fprintf(stderr, "Failed to load glGenFramebuffers\n");
+    if((glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC) wglGetProcAddress("glBindFramebuffer"))==0)
+      fprintf(stderr, "Failed to load glBindFramebuffer\n");
+    if((glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC) wglGetProcAddress("glFramebufferTexture2D"))==0)
+      fprintf(stderr, "Failed to load glFramebufferTexture2D\n");
+    if((glCheckNamedFramebufferStatus = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC) wglGetProcAddress("glCheckNamedFramebufferStatus"))==0)
+      fprintf(stderr, "Failed to load glCheckNamedFramebufferStatus\n");
+    if((glCreateShader = (PFNGLCREATESHADERPROC) wglGetProcAddress("glCreateShader"))==0)
+      fprintf(stderr, "Failed to load glCreateShader\n");
+    if((glShaderSource = (PFNGLSHADERSOURCEPROC) wglGetProcAddress("glShaderSource"))==0)
+      fprintf(stderr, "Failed to load glShaderSource\n");
+    if((glCompileShader = (PFNGLCOMPILESHADERPROC) wglGetProcAddress("glCompileShader"))==0)
+      fprintf(stderr, "Failed to load glCompileShader\n");
+    if((glGetShaderiv = (PFNGLGETSHADERIVPROC) wglGetProcAddress("glGetShaderiv"))==0)
+      fprintf(stderr, "Failed to load glGetShaderiv\n");
+    if((glCreateProgram = (PFNGLCREATEPROGRAMPROC) wglGetProcAddress("glCreateProgram"))==0)
+      fprintf(stderr, "Failed to load glCreateProgram\n");
+    if((glAttachShader = (PFNGLATTACHSHADERPROC) wglGetProcAddress("glAttachShader"))==0)
+      fprintf(stderr, "Failed to load glAttachShader\n");
+    if((glLinkProgram = (PFNGLLINKPROGRAMPROC) wglGetProcAddress("glLinkProgram"))==0)
+      fprintf(stderr, "Failed to load glLinkProgram\n");
+    if((glGetProgramiv = (PFNGLGETPROGRAMIVPROC) wglGetProcAddress("glGetProgramiv"))==0)
+      fprintf(stderr, "Failed to load glGetProgramiv\n");
+    if((glDeleteShader = (PFNGLDELETESHADERPROC) wglGetProcAddress("glDeleteShader"))==0)
+      fprintf(stderr, "Failed to load glDeleteShader\n");
+    if((glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC) wglGetProcAddress("glGetUniformLocation"))==0)
+      fprintf(stderr, "Failed to load glGetUniformLocation\n");
+    if((glUseProgram = (PFNGLUSEPROGRAMPROC) wglGetProcAddress("glUseProgram"))==0)
+      fprintf(stderr, "Failed to load glUseProgram\n");
+    if((glUniform4f = (PFNGLUNIFORM4FPROC) wglGetProcAddress("glUniform4f"))==0)
+      fprintf(stderr, "Failed to load glUniform4f\n");
     loaded = 1;
   }
 }
