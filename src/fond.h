@@ -15,18 +15,8 @@ extern "C" {
 #else
 #  define FOND_EXPORT
 #endif
-
-#if !defined(WIN32) && !defined(_WIN32)
-#  define GL_GLEXT_PROTOTYPES
-#endif
-  
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-#if defined(WIN32) || defined(_WIN32)
-#  define FOND_WIN
-#  include "fond_windows.h"
-#endif
+  #include <stdint.h>
+  #include <stdlib.h>
 
   FOND_EXPORT enum fond_error{
     FOND_NO_ERROR,
@@ -53,7 +43,7 @@ extern "C" {
     unsigned int width;
     unsigned int height;
     unsigned int oversample;
-    GLuint atlas;
+    unsigned int atlas;
     // Internal data
     void *fontdata;
     void *chardata;
@@ -63,12 +53,12 @@ extern "C" {
 
   FOND_EXPORT struct fond_buffer{
     struct fond_font *font;
-    GLuint texture;
+    unsigned int texture;
     unsigned int width;
     unsigned int height;
     // Internal data
-    GLuint program;
-    GLuint framebuffer;
+    unsigned int program;
+    unsigned int framebuffer;
   };
 
   FOND_EXPORT struct fond_extent{
@@ -82,8 +72,8 @@ extern "C" {
   FOND_EXPORT void fond_free(struct fond_font *font);
   FOND_EXPORT int fond_load(struct fond_font *font);
   FOND_EXPORT int fond_load_fit(struct fond_font *font, unsigned int max_size);
-  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, GLuint *vao);
-  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, GLuint *vao);
+  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, unsigned int *vao);
+  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, unsigned int *vao);
   FOND_EXPORT int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent);
   FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent);
 

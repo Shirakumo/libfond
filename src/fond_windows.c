@@ -1,4 +1,4 @@
-#include "fond.h"
+#include "fond_internal.h"
 #ifdef FOND_WIN
 
 PFNGLGENERATEMIPMAPPROC glGenerateMipmap = 0;

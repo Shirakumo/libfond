@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include "fond_common.h"
-#include "fond.h"
+#include "fond_internal.h"
 #include "shader/to_texture.vert.h"
 #include "shader/to_texture.frag.h"
 

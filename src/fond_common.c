@@ -1,5 +1,4 @@
-#include "fond.h"
-#include "fond_common.h"
+#include "fond_internal.h"
 #include "utf8.h"
 #include <stdint.h>
 #include <stdlib.h>

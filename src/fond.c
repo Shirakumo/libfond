@@ -7,8 +7,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "fond_common.h"
-#include "fond.h"
+#include "fond_internal.h"
 #include "stb_rect_pack.h"
 #include "stb_truetype.h"
 
