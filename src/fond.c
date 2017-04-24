@@ -110,7 +110,7 @@ int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  if(glGetError() != GL_NO_ERROR){
+  if(!fond_check_glerror()){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_internal_cleanup;
   }
@@ -287,7 +287,7 @@ FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t siz
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  if(glGetError() != GL_NO_ERROR){
+  if(!fond_check_glerror()){
     glDeleteVertexArrays(1, &vao);
     fond_err(FOND_OPENGL_ERROR);
     goto fond_compute_cleanup;

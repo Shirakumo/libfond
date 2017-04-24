@@ -39,7 +39,7 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer->width, buffer->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
-  if(glGetError() != GL_NO_ERROR){
+  if(!fond_check_glerror()){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }
@@ -48,7 +48,7 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buffer->texture, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  if(glGetError() != GL_NO_ERROR
+  if(!fond_check_glerror()
      || glCheckNamedFramebufferStatus(buffer->framebuffer, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
@@ -138,7 +138,7 @@ FOND_EXPORT int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t 
   glUseProgram(0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  if(glGetError() != GL_NO_ERROR){
+  if(!fond_check_glerror()){
     glDeleteVertexArrays(1, &vao);
     fond_err(FOND_OPENGL_ERROR);
     return 0;

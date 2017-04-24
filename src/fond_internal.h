@@ -11,8 +11,10 @@
 #  include <GL/gl.h>
 #  include <GL/glext.h>
 #endif
+#include <GL/glu.h>
 
 int errorcode;
 void fond_err(int code);
+int fond_check_glerror();
 
 int fond_load_file(char *file, void **content);

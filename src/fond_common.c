@@ -88,8 +88,17 @@ int fond_load_file(char *file, void **pointer){
   return 1;
 }
 
-FOND_EXPORT void fond_err(int code){
+void fond_err(int code){
   errorcode = code;
+}
+
+int fond_check_glerror(){
+  GLint err = glGetError();
+  if(err != GL_NO_ERROR){
+    fprintf(stderr, "\nFond: OpenGL error %i: %s\n", err, gluErrorString(err));
+    return 0;
+  }
+  return 1;
 }
 
 FOND_EXPORT enum fond_error fond_error(){
