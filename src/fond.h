@@ -7,6 +7,7 @@ extern "C" {
 #ifdef _MSC_VER
 #  define FOND_WIN
 #  include <windows.h>
+#  include "fond_windows.h"
 #  ifdef FOND_STATIC_DEFINE
 #    define FOND_EXPORT
 #  else
