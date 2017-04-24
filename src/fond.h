@@ -5,9 +5,8 @@ extern "C" {
 #endif
 
 #ifdef _MSC_VER
-#  define GLEW_STATIC
+#  define FOND_WIN
 #  include <windows.h>
-#  include <GL/glew.h>
 #  ifdef FOND_STATIC_DEFINE
 #    define FOND_EXPORT
 #  else
