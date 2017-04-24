@@ -1,8 +1,8 @@
 #version 330 core
 uniform vec4 extent = vec4(1.0);
 
-in layout(location = 0) vec2 position;
-in layout(location = 1) vec2 in_tex_coord;
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 in_tex_coord;
 out vec2 tex_coord;
 
 void main(){
