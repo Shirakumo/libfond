@@ -67,6 +67,10 @@ int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
   stbtt_pack_context context = {0};
   unsigned char *atlasdata = calloc(font->width*font->height, sizeof(char));
 
+#ifdef FOND_WIN
+  fond_load_glext();
+#endif
+
   if(!atlasdata){
     fond_err(FOND_OUT_OF_MEMORY);
     goto fond_load_internal_cleanup;

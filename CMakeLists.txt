@@ -31,9 +31,6 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 file(GLOB lib_src "src/*.c")
 add_library(fond SHARED ${lib_src})
 set_property(TARGET fond PROPERTY C_STANDARD 99)
-if(WIN32)
-  add_definitions(-Wl,-init,fond_startup)
-endif()
 target_link_libraries(fond ${OPENGL_LIBRARIES})
 
 ## Test Program

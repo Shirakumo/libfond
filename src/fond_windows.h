@@ -31,4 +31,5 @@ extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 extern PFNGLUSEPROGRAMPROC glUseProgram;
 extern PFNGLUNIFORM4FPROC glUniform4f;
 
+void fond_load_glext();
 #endif
