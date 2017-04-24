@@ -1,7 +1,5 @@
 #include "fond.h"
 #ifdef FOND_WIN
-#include <GL/wglext.h>
-#pragma comment(lib,"opengl32.lib")
 
 PFNGLGENERATEMIPMAPPROC glGenerateMipmap = 0;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;

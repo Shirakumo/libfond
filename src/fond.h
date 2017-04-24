@@ -5,9 +5,6 @@ extern "C" {
 #endif
 
 #ifdef _MSC_VER
-#  define FOND_WIN
-#  include <windows.h>
-#  include "fond_windows.h"
 #  ifdef FOND_STATIC_DEFINE
 #    define FOND_EXPORT
 #  else
@@ -19,9 +16,17 @@ extern "C" {
 #  define FOND_EXPORT
 #endif
 
-#define GL_GLEXT_PROTOTYPES
+#if !defined(WIN32) && !defined(_WIN32)
+#  define GL_GLEXT_PROTOTYPES
+#endif
+  
 #include <GL/gl.h>
 #include <GL/glext.h>
+
+#if defined(WIN32) || defined(_WIN32)
+#  define FOND_WIN
+#  include "fond_windows.h"
+#endif
 
   FOND_EXPORT enum fond_error{
     FOND_NO_ERROR,

@@ -1,3 +1,7 @@
+#ifdef FOND_WIN
+#pragma comment(lib,"opengl32.lib")
+#include <GL/wglext.h>
+
 extern PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
 extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 extern PFNGLGENBUFFERSPROC glGenBuffers;
@@ -57,3 +61,5 @@ extern PFNGLUSEPROGRAMPROC glUseProgram;
 extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
+
+#endif
