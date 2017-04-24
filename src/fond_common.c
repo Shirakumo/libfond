@@ -9,7 +9,7 @@
 
 int errorcode = 0;
 
-int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
+FOND_EXPORT int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
   if(utf8valid(string)){
     fond_err(FOND_UTF8_CONVERSION_ERROR);
     return 0;
@@ -31,7 +31,7 @@ int fond_decode_utf8(void *string, int32_t **_decoded, size_t *_size){
   return 1;
 }
 
-int fond_compute(struct fond_font *font, char *text, size_t *_n, GLuint *_vao){
+FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *_n, GLuint *_vao){
   size_t size = 0;
   int32_t *codepoints = 0;
   
@@ -44,7 +44,7 @@ int fond_compute(struct fond_font *font, char *text, size_t *_n, GLuint *_vao){
   return (errorcode == FOND_NO_ERROR);
 }
 
-int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent){
+FOND_EXPORT int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent){
   size_t size = 0;
   int32_t *codepoints = 0;
   
@@ -57,7 +57,7 @@ int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *
   return (errorcode == FOND_NO_ERROR);
 }
 
-int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float *color){
+FOND_EXPORT int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float *color){
   size_t size = 0;
   int32_t *codepoints = 0;
   
@@ -89,15 +89,15 @@ int fond_load_file(char *file, void **pointer){
   return 1;
 }
 
-void fond_err(int code){
+FOND_EXPORT void fond_err(int code){
   errorcode = code;
 }
 
-enum fond_error fond_error(){
+FOND_EXPORT enum fond_error fond_error(){
   return errorcode;
 }
 
-char *fond_error_string(enum fond_error error){
+FOND_EXPORT char *fond_error_string(enum fond_error error){
   switch(error){
   case FOND_NO_ERROR:
     return "No error has occurred yet.";

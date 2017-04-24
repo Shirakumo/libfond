@@ -7,7 +7,7 @@
 const GLchar *to_texture_vert_src = to_texture_vert;
 const GLchar *to_texture_frag_src = to_texture_frag;
 
-void fond_free_buffer(struct fond_buffer *buffer){
+FOND_EXPORT void fond_free_buffer(struct fond_buffer *buffer){
   if(buffer->texture)
     glDeleteTextures(1, &buffer->texture);
   buffer->texture = 0;
@@ -21,7 +21,7 @@ void fond_free_buffer(struct fond_buffer *buffer){
   buffer->framebuffer = 0;
 }
 
-int fond_load_buffer(struct fond_buffer *buffer){
+FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   GLuint vert = 0, frag = 0;
   GLint res = 0;
   
@@ -109,7 +109,7 @@ int fond_load_buffer(struct fond_buffer *buffer){
   return 0;
 }
 
-int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color){
+FOND_EXPORT int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color){
   size_t n;
   GLuint vao = 0, extent_u = 0, color_u = 0;
   

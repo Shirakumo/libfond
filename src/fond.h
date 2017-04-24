@@ -22,7 +22,7 @@ extern "C" {
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-  enum fond_error{
+  FOND_EXPORT enum fond_error{
     FOND_NO_ERROR,
     FOND_FILE_LOAD_FAILED,
     FOND_OUT_OF_MEMORY,
@@ -36,7 +36,7 @@ extern "C" {
     FOND_NO_CHARACTERS_OR_CODEPOINTS
   };
   
-  struct fond_font{
+  FOND_EXPORT struct fond_font{
     // Font info
     char *file;
     int index;
@@ -55,7 +55,7 @@ extern "C" {
     int converted_codepoints;
   };
 
-  struct fond_buffer{
+  FOND_EXPORT struct fond_buffer{
     struct fond_font *font;
     GLuint texture;
     unsigned int width;
@@ -65,7 +65,7 @@ extern "C" {
     GLuint framebuffer;
   };
 
-  struct fond_extent{
+  FOND_EXPORT struct fond_extent{
     float l;
     float r;
     float t;
@@ -73,22 +73,22 @@ extern "C" {
     float gap;
   };
 
-  void fond_free(struct fond_font *font);
-  int fond_load(struct fond_font *font);
-  int fond_load_fit(struct fond_font *font, unsigned int max_size);
-  int fond_compute(struct fond_font *font, char *text, size_t *n, GLuint *vao);
-  int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, GLuint *vao);
-  int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent);
-  int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent);
+  FOND_EXPORT void fond_free(struct fond_font *font);
+  FOND_EXPORT int fond_load(struct fond_font *font);
+  FOND_EXPORT int fond_load_fit(struct fond_font *font, unsigned int max_size);
+  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, GLuint *vao);
+  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, GLuint *vao);
+  FOND_EXPORT int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent);
+  FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent);
 
-  void fond_free_buffer(struct fond_buffer *buffer);
-  int fond_load_buffer(struct fond_buffer *buffer);
-  int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float *color);
-  int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color);
+  FOND_EXPORT void fond_free_buffer(struct fond_buffer *buffer);
+  FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer);
+  FOND_EXPORT int fond_render(struct fond_buffer *buffer, char *text, float x, float y, float *color);
+  FOND_EXPORT int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color);
 
-  int fond_decode_utf8(void *string, int32_t **decoded, size_t *size);
-  enum fond_error fond_error();
-  char *fond_error_string(enum fond_error error);
+  FOND_EXPORT int fond_decode_utf8(void *string, int32_t **decoded, size_t *size);
+  FOND_EXPORT enum fond_error fond_error();
+  FOND_EXPORT char *fond_error_string(enum fond_error error);
   
 #ifdef __cplusplus
 }

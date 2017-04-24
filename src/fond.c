@@ -12,7 +12,7 @@
 #include "stb_rect_pack.h"
 #include "stb_truetype.h"
 
-void fond_free(struct fond_font *font){
+FOND_EXPORT void fond_free(struct fond_font *font){
   if(font->atlas)
     glDeleteTextures(1, &font->atlas);
   font->atlas = 0;
@@ -129,7 +129,7 @@ int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
   return 0;
 }
 
-int fond_load(struct fond_font *font){
+FOND_EXPORT int fond_load(struct fond_font *font){
   stbtt_pack_range range = {0};
   
   if(!fond_load_file(font->file, &font->fontdata)){
@@ -159,7 +159,7 @@ int fond_load(struct fond_font *font){
   return 0;
 }
 
-int fond_load_fit(struct fond_font *font, unsigned int max_size){
+FOND_EXPORT int fond_load_fit(struct fond_font *font, unsigned int max_size){
   stbtt_pack_range range = {0};
 
   if(!fond_load_file(font->file, &font->fontdata)){
@@ -212,7 +212,7 @@ int fond_codepoint_index(struct fond_font *font, uint32_t glyph){
   return -1;
 }
 
-int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_n, GLuint *_vao){
+FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_n, GLuint *_vao){
   GLfloat *vert = 0;
   GLuint *ind = 0;
   GLuint vao = 0, vbo = 0, ebo = 0;
@@ -310,7 +310,7 @@ int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_
   return (errorcode == FOND_NO_ERROR);
 }
 
-int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
+FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
   int ascent, descent, linegap;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
