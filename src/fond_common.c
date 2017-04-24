@@ -70,7 +70,7 @@ FOND_EXPORT int fond_render(struct fond_buffer *buffer, char *text, float x, flo
 }
 
 int fond_load_file(char *file, void **pointer){
-  FILE *fd = fopen(file, "r");
+  FILE *fd = fopen(file, "rb");
   if(!fd) return 0;
 
   struct stat finfo;
