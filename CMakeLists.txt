@@ -6,6 +6,14 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW)
 find_package(GLFW)
 
+if(GLFW_FOUND)
+  include_directories(${GLFW_INCLUDE_DIRS})
+endif()
+
+if(GLEW_FOUND)
+  include_directories(${GLEW_INCLUDE_DIRS})
+endif()
+
 include_directories("src/")
 include_directories(${OPENGL_INCLUDE_DIRS})
 
@@ -32,12 +40,15 @@ endforeach()
 file(GLOB lib_src "src/*.c")
 add_library(fond SHARED ${lib_src})
 set_property(TARGET fond PROPERTY C_STANDARD 99)
-target_link_libraries(fond ${OPENGL_LIBRARIES})
+if(WIN32)
+  find_package(GLEW REQUIRED)
+  target_link_libraries(fond ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
+else()
+  target_link_libraries(fond ${OPENGL_LIBRARIES})
+endif()
 
 ## Test Program
 if(GLFW_FOUND AND GLEW_FOUND)
-  include_directories(${GLFW_INCLUDE_DIRS})
-  include_directories(${GLEW_INCLUDE_DIRS})
   file(GLOB test_src "test/*.c")
   add_executable(fond_test ${test_src})
   set_property(TARGET fond_test PROPERTY C_STANDARD 99)
