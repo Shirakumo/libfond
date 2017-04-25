@@ -2,7 +2,7 @@
 This is a library for font rendering, allowing you to easily and quickly render TrueType font text to OpenGL.
 
 ## API
-The API is documented in [fond.h](fond.h).
+The API is documented in [fond.h](src/fond.h).
 
 ## Building It
 Requirements:
