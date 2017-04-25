@@ -7,11 +7,12 @@
 #  include "fond_windows.h"
 #endif
 #if defined(__APPLE__)
+#  define FOND_MAC
 #  define GL_GLEXT_PROTOTYPES
-#  include <OpenGL/gl.h>
-#  include <OpenGL/glext.h>
+#  include <OpenGL/gl3.h>
 #endif
 #if defined(__linux__)
+#  define FOND_LIN
 #  define GL_GLEXT_PROTOTYPES
 #  include <GL/gl.h>
 #  include <GL/glext.h>
