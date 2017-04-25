@@ -48,7 +48,7 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buffer->texture, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   if(!fond_check_glerror()
-     || glCheckNamedFramebufferStatus(buffer->framebuffer, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+     || glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
     fond_err(FOND_OPENGL_ERROR);
     goto fond_load_buffer_cleanup;
   }

@@ -16,7 +16,7 @@ PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers = 0;
 PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers = 0;
 PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer = 0;
 PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D = 0;
-PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus = 0;
+PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus = 0;
 PFNGLCREATESHADERPROC glCreateShader = 0;
 PFNGLSHADERSOURCEPROC glShaderSource = 0;
 PFNGLCOMPILESHADERPROC glCompileShader = 0;
@@ -65,8 +65,8 @@ void fond_load_glext(){
       fprintf(stderr, "Failed to load glBindFramebuffer\n");
     if((glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC) wglGetProcAddress("glFramebufferTexture2D"))==0)
       fprintf(stderr, "Failed to load glFramebufferTexture2D\n");
-    if((glCheckNamedFramebufferStatus = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC) wglGetProcAddress("glCheckNamedFramebufferStatus"))==0)
-      fprintf(stderr, "Failed to load glCheckNamedFramebufferStatus\n");
+    if((glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC) wglGetProcAddress("glCheckFramebufferStatus"))==0)
+      fprintf(stderr, "Failed to load glCheckFramebufferStatus\n");
     if((glCreateShader = (PFNGLCREATESHADERPROC) wglGetProcAddress("glCreateShader"))==0)
       fprintf(stderr, "Failed to load glCreateShader\n");
     if((glShaderSource = (PFNGLSHADERSOURCEPROC) wglGetProcAddress("glShaderSource"))==0)
