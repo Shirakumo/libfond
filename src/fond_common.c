@@ -92,10 +92,33 @@ void fond_err(int code){
   errorcode = code;
 }
 
+char *glErrorString(GLint err){
+  switch(err){
+  case GL_NO_ERROR:
+    return "No error has been recorded.";
+  case GL_INVALID_ENUM:
+    return "An unacceptable value is specified for an enumerated argument.";
+  case GL_INVALID_VALUE:
+    return "A numeric argument is out of range.";
+  case GL_INVALID_OPERATION:
+    return "The specified operation is not allowed in the current state.";
+  case GL_INVALID_FRAMEBUFFER_OPERATION:
+    return "The framebuffer object is not complete.";
+  case GL_OUT_OF_MEMORY:
+    return "There is not enough memory left to execute the command.";
+  case GL_STACK_UNDERFLOW:
+    return "An attempt has been made to perform an operation that would cause an internal stack to underflow.";
+  case GL_STACK_OVERFLOW:
+    return "An attempt has been made to perform an operation that would cause an internal stack to overflow.";
+  default:
+    return "Unknown GL error value.";
+  }
+}
+
 int fond_check_glerror(){
   GLint err = glGetError();
   if(err != GL_NO_ERROR){
-    fprintf(stderr, "\nFond: OpenGL error %i: %s\n", err, gluErrorString(err));
+    fprintf(stderr, "\nFond: OpenGL error %i: %s\n", err, glErrorString(err));
     return 0;
   }
   return 1;
