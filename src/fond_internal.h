@@ -5,13 +5,20 @@
 #  include <GL/gl.h>
 #  include <GL/glext.h>
 #  include "fond_windows.h"
+#  include <GL/glu.h>
 #endif
-#if !defined(WIN32) && !defined(_WIN32)
+#if defined(__APPLE__)
+#  define GL_GLEXT_PROTOTYPES
+#  include <OpenGL/gl.h>
+#  include <OpenGL/glext.h>
+#  include <OpenGL/glu.h>
+#endif
+#if defined(__linux__)
 #  define GL_GLEXT_PROTOTYPES
 #  include <GL/gl.h>
 #  include <GL/glext.h>
+#  include <GL/glu.h>
 #endif
-#include <GL/glu.h>
 
 int errorcode;
 void fond_err(int code);
