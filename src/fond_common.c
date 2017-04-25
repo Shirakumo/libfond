@@ -106,10 +106,12 @@ char *glErrorString(GLint err){
     return "The framebuffer object is not complete.";
   case GL_OUT_OF_MEMORY:
     return "There is not enough memory left to execute the command.";
+#ifndef FOND_MAC
   case GL_STACK_UNDERFLOW:
     return "An attempt has been made to perform an operation that would cause an internal stack to underflow.";
   case GL_STACK_OVERFLOW:
     return "An attempt has been made to perform an operation that would cause an internal stack to overflow.";
+#endif
   default:
     return "Unknown GL error value.";
   }
