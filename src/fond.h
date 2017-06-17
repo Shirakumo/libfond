@@ -203,8 +203,21 @@ extern "C" {
   // arguments, containing the number of elements
   // and the OpenGL VAO ID respectively.
   // The text must be UTF8 encoded and null-
-  // terminated. The returned VAO contains two
-  // arrays, at location 0 and 1, with both being
+  // terminated.
+  //
+  // The VAO and necessary VBOs are allocated
+  // automatically for you and then filled in as
+  // per fond_update.
+  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, unsigned int *vao);
+
+  // Same as fond_compute, but taking an UTF32
+  // encoded string of codepoints and its size.
+  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, unsigned int *vao);
+
+  // Update the given vertex buffer and element
+  // buffers to contain the necessary data to draw
+  // the given text. The VBO packs two arrays, one
+  // at location 0 and one at 1, with both being
   // vec2s. The first being the vertex coordinates
   // and the second being the texture coordinates.
   // The vertex coordinates start at 0 and increase
@@ -217,11 +230,11 @@ extern "C" {
   // (U+000A) a new line is started automatically
   // by resetting X to 0 and decreasing Y by the
   // necessary height for a new line.
-  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, unsigned int *vao);
+  FOND_EXPORT int fond_update(struct fond_font *font, char *text, size_t *n, unsigned int vbo, unsigned int ebo);
 
-  // Same as fond_compute, but taking an UTF32
+  // Same as fond_update, but taking an UTF32
   // encoded string of codepoints and its size.
-  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, unsigned int *vao);
+  FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, unsigned int vbo, unsigned int ebo);
 
   // Compute the extent of the given text.
   // You must allocate the extent struct yourself

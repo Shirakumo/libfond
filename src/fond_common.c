@@ -43,6 +43,19 @@ FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *_n, GLu
   return (errorcode == FOND_NO_ERROR);
 }
 
+FOND_EXPORT int fond_update(struct fond_font *font, char *text, size_t *_n, GLuint vbo, GLuint ebo){
+  size_t size = 0;
+  int32_t *codepoints = 0;
+  
+  if(!fond_decode_utf8((void *)text, &codepoints, &size)){
+    return 0;
+  }
+
+  fond_update_u(font, codepoints, size, _n, vbo, ebo);
+  free(codepoints);
+  return (errorcode == FOND_NO_ERROR);
+}
+
 FOND_EXPORT int fond_compute_extent(struct fond_font *font, char *text, struct fond_extent *extent){
   size_t size = 0;
   int32_t *codepoints = 0;

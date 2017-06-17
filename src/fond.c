@@ -217,21 +217,63 @@ int fond_codepoint_index(struct fond_font *font, uint32_t glyph){
 }
 
 FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *_n, GLuint *_vao){
+  GLuint vao = 0, vbo = 0, ebo = 0;
+
+  glGenVertexArrays(1, &vao);
+  glGenBuffers(1, &vbo);
+  glGenBuffers(1, &ebo);
+
+  if(!fond_update_u(font, text, size, _n, vbo, ebo)){
+    goto fond_compute_cleanup;
+  }
+
+  glBindVertexArray(vao);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)(2*sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  if(!fond_check_glerror()){
+    glDeleteVertexArrays(1, &vao);
+    fond_err(FOND_OPENGL_ERROR);
+    goto fond_compute_cleanup;
+  }
+
+  *_vao = vao;
+
+ fond_compute_cleanup:
+  if(vbo)
+    glDeleteBuffers(1, &vbo);
+
+  if(ebo)
+    glDeleteBuffers(1, &ebo);
+
+  return (errorcode == FOND_NO_ERROR);
+}
+
+FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size, size_t *_n, GLuint vbo, GLuint ebo){
   GLfloat *vert = 0;
   GLuint *ind = 0;
-  GLuint vao = 0, vbo = 0, ebo = 0;
   float x = 0, y = 0;
   
   if(!font->chardata){
     fond_err(FOND_NOT_LOADED);
-    goto fond_compute_cleanup;
+    goto fond_update_cleanup;
   }
 
   vert = calloc(4*4*size, sizeof(GLfloat));
   ind = calloc(2*3*size, sizeof(GLuint));
   if(!vert || !ind){
     fond_err(FOND_OUT_OF_MEMORY);
-    goto fond_compute_cleanup;
+    goto fond_update_cleanup;
   }
 
   int ascent, descent, linegap;
@@ -244,7 +286,7 @@ FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t siz
     int index = fond_codepoint_index(font, text[i]);
     if(index < 0){
       fond_err(FOND_UNLOADED_GLYPH);
-      goto fond_compute_cleanup;
+      goto fond_update_cleanup;
     }
   
     stbtt_GetPackedQuad((stbtt_packedchar *)font->chardata, font->width, font->height, index, &x, &y, &quad, 1);
@@ -267,49 +309,29 @@ FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t siz
     ind[ii++] = i*4+0; ind[ii++] = i*4+1; ind[ii++] = i*4+3;
     ind[ii++] = i*4+1; ind[ii++] = i*4+2; ind[ii++] = i*4+3;
   }
-
-  glGenVertexArrays(1, &vao);
-  glGenBuffers(1, &vbo);
-  glGenBuffers(1, &ebo);
-
-  glBindVertexArray(vao);
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*4*size, vert, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)(2*sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*6*size, ind, GL_STATIC_DRAW);
-  
-  glBindVertexArray(0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*4*size, vert, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*6*size, ind, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
   if(!fond_check_glerror()){
-    glDeleteVertexArrays(1, &vao);
     fond_err(FOND_OPENGL_ERROR);
-    goto fond_compute_cleanup;
+    goto fond_update_cleanup;
   }
 
   fond_err(FOND_NO_ERROR);
   *_n = 2*3*size;
-  *_vao = vao;
 
- fond_compute_cleanup:
+ fond_update_cleanup:
   if(vert)
     free(vert);
 
   if(ind)
     free(ind);
-
-  if(vbo)
-    glDeleteBuffers(2, &vbo);
-
-  if(ebo)
-    glDeleteBuffers(2, &ebo);
 
   return (errorcode == FOND_NO_ERROR);
 }
