@@ -223,10 +223,6 @@ FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t siz
   glGenBuffers(1, &vbo);
   glGenBuffers(1, &ebo);
 
-  if(!fond_update_u(font, text, size, _n, vbo, ebo)){
-    goto fond_compute_cleanup;
-  }
-
   glBindVertexArray(vao);
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -244,6 +240,10 @@ FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t siz
   if(!fond_check_glerror()){
     glDeleteVertexArrays(1, &vao);
     fond_err(FOND_OPENGL_ERROR);
+    goto fond_compute_cleanup;
+  }
+  
+  if(!fond_update_u(font, text, size, _n, vbo, ebo)){
     goto fond_compute_cleanup;
   }
 
@@ -309,6 +309,12 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
     ind[ii++] = i*4+0; ind[ii++] = i*4+1; ind[ii++] = i*4+3;
     ind[ii++] = i*4+1; ind[ii++] = i*4+2; ind[ii++] = i*4+3;
   }
+
+  // This is done as a sanity option, as otherwise we might rebind the
+  // buffers of a bound VAO in the outermost scope. Properly doing this
+  // would require getting the currently bound values and restoring and
+  // all that, but I think it's fine to not do that here.
+  glBindVertexArray(0);
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*4*size, vert, GL_DYNAMIC_DRAW);

@@ -137,6 +137,9 @@ extern "C" {
     // Internal data.
     unsigned int program;
     unsigned int framebuffer;
+    unsigned int vao;
+    unsigned int vbo;
+    unsigned int ebo;
   };
 
   // This struct contains information about
@@ -203,20 +206,7 @@ extern "C" {
   // arguments, containing the number of elements
   // and the OpenGL VAO ID respectively.
   // The text must be UTF8 encoded and null-
-  // terminated.
-  //
-  // The VAO and necessary VBOs are allocated
-  // automatically for you and then filled in as
-  // per fond_update.
-  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, unsigned int *vao);
-
-  // Same as fond_compute, but taking an UTF32
-  // encoded string of codepoints and its size.
-  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, unsigned int *vao);
-
-  // Update the given vertex buffer and element
-  // buffers to contain the necessary data to draw
-  // the given text. The VBO packs two arrays, one
+  // terminated. The VAO packs two arrays, one
   // at location 0 and one at 1, with both being
   // vec2s. The first being the vertex coordinates
   // and the second being the texture coordinates.
@@ -230,6 +220,40 @@ extern "C" {
   // (U+000A) a new line is started automatically
   // by resetting X to 0 and decreasing Y by the
   // necessary height for a new line.
+  //
+  // The VAO and necessary VBOs are allocated
+  // automatically for you and then filled in as
+  // per fond_update.
+  FOND_EXPORT int fond_compute(struct fond_font *font, char *text, size_t *n, unsigned int *vao);
+
+  // Same as fond_compute, but taking an UTF32
+  // encoded string of codepoints and its size.
+  FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t size, size_t *n, unsigned int *vao);
+
+  // Update the given vertex buffer and element
+  // buffers to contain the necessary data to draw
+  // the given text.
+  // The EBO must be bound to a VAO as a
+  // GL_ELEMENT_ARRAY_BUFFER and the VBO as a
+  // GL_ARRAY_BUFFER. The VBO contains GLfloats and
+  // the EBO contains GLuints. The VBO packs two
+  // distinct values as described in fond_compute.
+  // They are stored alternatingly in the buffer,
+  // meaning that you should bind the buffer to a
+  // VAO like this:
+  // 
+  // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)0);
+  // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)(2*sizeof(float)));
+  //
+  // The data is stored in the buffers using
+  // DYNAMIC_DRAW, meaning they should be able to
+  // be updated frequently enough.
+  //
+  // Note that the GL buffer and vertex array
+  // bindings are modified by this function. You
+  // should thus not expect previously bound values
+  // to still be the same after this function
+  // returns.
   FOND_EXPORT int fond_update(struct fond_font *font, char *text, size_t *n, unsigned int vbo, unsigned int ebo);
 
   // Same as fond_update, but taking an UTF32

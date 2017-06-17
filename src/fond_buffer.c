@@ -78,6 +78,29 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
     goto fond_load_buffer_cleanup;
   }
 
+  glGenVertexArrays(1, &buffer->vao);
+  glGenBuffers(1, &buffer->vbo);
+  glGenBuffers(1, &buffer->ebo);
+
+  glBindVertexArray(buffer->vao);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*4, (GLvoid*)(2*sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->ebo);
+  
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  if(!fond_check_glerror()){
+    fond_err(FOND_OPENGL_ERROR);
+    goto fond_load_buffer_cleanup;
+  }
+
   fond_err(FOND_NO_ERROR);
   glDeleteShader(vert);
   glDeleteShader(frag);
@@ -101,14 +124,23 @@ FOND_EXPORT int fond_load_buffer(struct fond_buffer *buffer){
   if(buffer->program)
     glDeleteProgram(buffer->program);
   buffer->program = 0;
+
+  if(buffer->ebo)
+    glDeleteBuffers(1, &buffer->ebo);
+
+  if(buffer->vbo)
+    glDeleteBuffers(1, &buffer->vbo);
+
+  if(buffer->vao)
+    glDeleteVertexArrays(1, &buffer->vao);
   return 0;
 }
 
 FOND_EXPORT int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t size, float x, float y, float *color){
   size_t n;
-  GLuint vao = 0, extent_u = 0, color_u = 0;
+  GLuint extent_u = 0, color_u = 0;
   
-  if(!fond_compute_u(buffer->font, text, size, &n, &vao)){
+  if(!fond_update_u(buffer->font, text, size, &n, buffer->vbo, buffer->ebo)){
     return 0;
   }
   
@@ -118,7 +150,7 @@ FOND_EXPORT int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t 
   glBindFramebuffer(GL_FRAMEBUFFER, buffer->framebuffer);
   glViewport(0, 0, buffer->width, buffer->height);
   glUseProgram(buffer->program);
-  glBindVertexArray(vao);
+  glBindVertexArray(buffer->vao);
   glBindTexture(GL_TEXTURE_2D, buffer->font->atlas);
   glUniform4f(extent_u, x, y, buffer->width, buffer->height);
   if(color) glUniform4f(color_u, color[0], color[1], color[2], color[3]);
@@ -135,12 +167,10 @@ FOND_EXPORT int fond_render_u(struct fond_buffer *buffer, int32_t *text, size_t 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   if(!fond_check_glerror()){
-    glDeleteVertexArrays(1, &vao);
     fond_err(FOND_OPENGL_ERROR);
     return 0;
   }
   
   fond_err(FOND_NO_ERROR);
-  glDeleteVertexArrays(1, &vao);
   return 1;
 }
