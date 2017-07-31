@@ -34,6 +34,10 @@ add_dependencies(fond shaders)
 set_property(TARGET fond PROPERTY C_STANDARD 99)
 target_link_libraries(fond ${OPENGL_LIBRARIES})
 
+if(WIN32)
+  set(CMAKE_SHARED_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+endif()
+
 ## Test Program
 if(GLFW_FOUND AND GLEW_FOUND)
   include_directories(${GLEW_INCLUDE_DIRS})
