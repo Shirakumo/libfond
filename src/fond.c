@@ -306,8 +306,8 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
     }
   
     int ii = 2*3*i;
-    ind[ii++] = i*4+0; ind[ii++] = i*4+1; ind[ii++] = i*4+3;
-    ind[ii++] = i*4+1; ind[ii++] = i*4+2; ind[ii++] = i*4+3;
+    ind[ii++] = i*4+0; ind[ii++] = i*4+3; ind[ii++] = i*4+1;
+    ind[ii++] = i*4+1; ind[ii++] = i*4+3; ind[ii++] = i*4+2;
   }
 
   // This is done as a sanity option, as otherwise we might rebind the

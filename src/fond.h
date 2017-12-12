@@ -216,6 +216,11 @@ extern "C" {
   // for your display.
   // The texture coordinates are for the font's
   // atlas texture.
+  // The triangles are defined with their vertices
+  // in counter-clockwise (CCW) order, meaning
+  // that if you apply cull-face, you need to have
+  // front-faces be set to CCW, which should be
+  // the default.
   // If the text contains a Linefeed character
   // (U+000A) a new line is started automatically
   // by resetting X to 0 and decreasing Y by the

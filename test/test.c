@@ -142,6 +142,8 @@ int main(int argc, char **argv){
     goto main_cleanup;
   }
 
+  glEnable(GL_CULL_FACE);
+  glFrontFace(GL_CCW);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -166,8 +168,8 @@ int main(int argc, char **argv){
     -1.0f,  1.0f, 0.0f,  0.0f, 1.0f
   };
   GLuint indices[] = {
-    0, 1, 3,
-    1, 2, 3
+    0, 3, 1,
+    1, 3, 2
   };
 
   glGenVertexArrays(1, &vao);
