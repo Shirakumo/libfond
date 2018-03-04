@@ -112,6 +112,7 @@ extern "C" {
     void *chardata;
     void *fontinfo;
     int converted_codepoints;
+    int allocated_atlas;
   };
 
   // This struct allows for convenience in
@@ -175,11 +176,20 @@ extern "C" {
   // will /not/ free the characters array,
   // the file array, or the codepoints array
   // if the codepoints array was not computed
-  // by fond_load*.
+  // by fond_load*. It will also not free the
+  // texture atlas if it was not alloced by
+  // fond_load*.
   FOND_EXPORT void fond_free(struct fond_font *font);
 
   // Load the font struct and allocate the
-  // necessary OpenGL data.
+  // necessary OpenGL data. The texture atlas
+  // is not allocated if the font's atlas field
+  // is already set. It is however always filled
+  // via glSubImage2D. The bit depth of the pixel
+  // values is only 255, and only the red channel
+  // is filled, so a texture with internal format
+  // of GL_R8 will be created for you if you
+  // don't specify your own.
   // The following fields must be set in the
   // struct:
   //   file

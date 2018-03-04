@@ -12,9 +12,10 @@
 #include "stb_truetype.h"
 
 FOND_EXPORT void fond_free(struct fond_font *font){
-  if(font->atlas)
+  if(font->allocated_atlas && font->atlas)
     glDeleteTextures(1, &font->atlas);
   font->atlas = 0;
+  font->allocated_atlas = 0;
   
   if(font->converted_codepoints && font->codepoints)
     free(font->codepoints);
@@ -98,17 +99,27 @@ int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
 
   stbtt_PackEnd(&context);
 
-  glGenTextures(1, &font->atlas);
-  glBindTexture(GL_TEXTURE_2D, font->atlas);
+  if(font->atlas == 0){
+    font->allocated_atlas = 1;
+    glGenTextures(1, &font->atlas);
+    glBindTexture(GL_TEXTURE_2D, font->atlas);
+    glTexStorage2D(GL_TEXTURE_2D, 8, GL_R8, font->width, font->height);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.65);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  }else{
+    glBindTexture(GL_TEXTURE_2D, font->atlas);
+  }
+
+  GLint unpack;
+  glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.65);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, font->width, font->height, 0, GL_RED, GL_UNSIGNED_BYTE, atlasdata);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, font->width, font->height, GL_RED, GL_UNSIGNED_BYTE, atlasdata);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, unpack);
 
   if(!fond_check_glerror()){
     fond_err(FOND_OPENGL_ERROR);
@@ -126,9 +137,11 @@ int fond_load_internal(struct fond_font *font, stbtt_pack_range *range){
     free(font->fontinfo);
   font->fontinfo = 0;
   
-  if(font->atlas)
+  if(font->allocated_atlas && font->atlas){
     glDeleteTextures(1, &font->atlas);
-  font->atlas = 0;
+    font->atlas = 0;
+  }
+  font->allocated_atlas = 0;
   return 0;
 }
 
@@ -285,6 +298,7 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
     stbtt_aligned_quad quad = {0};
     int index = fond_codepoint_index(font, text[i]);
     if(index < 0){
+      printf("FOND: Unloaded glyph %c (U+%x) at %i\n", text[i], text[i], text[i]);
       fond_err(FOND_UNLOADED_GLYPH);
       goto fond_update_cleanup;
     }
