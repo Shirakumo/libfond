@@ -3,6 +3,7 @@
 #include <GL/wglext.h>
 
 extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
+extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
 extern PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
 extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 extern PFNGLGENBUFFERSPROC glGenBuffers;
