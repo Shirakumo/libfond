@@ -2,6 +2,7 @@
 #pragma comment(lib,"opengl32.lib")
 #include <GL/wglext.h>
 
+extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
 extern PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
 extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 extern PFNGLGENBUFFERSPROC glGenBuffers;
