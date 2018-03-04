@@ -2,7 +2,6 @@
 #ifdef FOND_WIN
 
 PFNGLTEXSTORAGE2DPROC glTexStorage2D = 0;
-PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D = 0;
 PFNGLGENERATEMIPMAPPROC glGenerateMipmap = 0;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = 0;
 PFNGLGENBUFFERSPROC glGenBuffers = 0;
@@ -39,8 +38,6 @@ void fond_load_glext(){
   if(!loaded){
     if((glTexStorage2D = (PFNGLTEXSTORAGE2DPROC) wglGetProcAddress("glTexStorage2D"))==0)
       fprintf(stderr, "Failed to load glTexStorage2D\n");
-    if((glTexSubImage2D = (PFNGLTEXSUBIMAGE2DPROC) wglGetProcAddress("glTexSubImage2D"))==0)
-      fprintf(stderr, "Failed to load glTexSubImage2D\n");
     if((glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC) wglGetProcAddress("glGenerateMipmap"))==0)
       fprintf(stderr, "Failed to load glGenerateMipmap\n");
     if((glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC) wglGetProcAddress("glGenVertexArrays"))==0)
