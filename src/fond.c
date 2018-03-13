@@ -2,6 +2,7 @@
 #define STB_RECT_PACK_IMPLEMENTATION
 #define STBTT_STATIC
 #define STBRP_STATIC
+#define LINEFEED 0x000A
 
 #include <stdio.h>
 #include <math.h>
@@ -305,7 +306,7 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
   
     stbtt_GetPackedQuad((stbtt_packedchar *)font->chardata, font->width, font->height, index, &x, &y, &quad, 1);
     int vi = 4*4*i;
-    if(text[i] == 0x000A){ // Linefeed
+    if(text[i] == LINEFEED){
       vert[vi++] = quad.x0; vert[vi++] = -quad.y1; vert[vi++] = 0; vert[vi++] = 0;
       vert[vi++] = quad.x0; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = 0;
       vert[vi++] = quad.x1; vert[vi++] = -quad.y0; vert[vi++] = 0; vert[vi++] = 0;
@@ -357,23 +358,43 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
 }
 
 FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
-  int ascent, descent, linegap;
+  int ascent, descent, linegap, advance, bearing;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
+  float vskip = scale*(linegap+ascent-descent);
+  extent->l = 0;
+  extent->r = 0;
   extent->t = ascent;
   extent->b = -descent;
   extent->gap = linegap;
   
   if(0 < size){
-    int advance, bearing;
-    stbtt_GetCodepointHMetrics(font->fontinfo, text[0], &advance, &bearing);
-    extent->r = advance;
-    extent->l = -bearing;
-    for(size_t i=1; i<size; ++i){
-      extent->r += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]);
-      stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
-      extent->r += advance;
+    int right = 0;
+    size_t i=0;
+    // Get left extent by finding first real character.
+    for(; i<size; ++i){
+      if(text[i] == LINEFEED){
+        extent->b += vskip;
+      }else{
+        stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
+        right += advance;
+        extent->l = -bearing;
+        break;
+      }
     }
+    // Compute the maximal right and bottom extent.
+    for(; i<size; ++i){
+      if(text[i] == LINEFEED){
+        extent->b += vskip;
+        extent->r = (extent->r > right)? extent->r : right;
+        right = 0;
+      }else{
+        right += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]);
+        stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
+        right += advance;
+      }
+    }
+    extent->r = (extent->r > right)? extent->r : right;
   }
 
   fond_err(FOND_NO_ERROR);
