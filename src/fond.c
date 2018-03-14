@@ -293,7 +293,7 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
   int ascent, descent, linegap;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
-  float vskip = scale*(linegap+ascent-descent);
+  float vskip = scale*(linegap+ascent);
 
   for(size_t i=0; i<size; ++i){
     stbtt_aligned_quad quad = {0};
@@ -303,7 +303,9 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
       fond_err(FOND_UNLOADED_GLYPH);
       goto fond_update_cleanup;
     }
-  
+
+    if(i>0)
+      x += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]) * scale;
     stbtt_GetPackedQuad((stbtt_packedchar *)font->chardata, font->width, font->height, index, &x, &y, &quad, 1);
     int vi = 4*4*i;
     if(text[i] == LINEFEED){
@@ -359,47 +361,41 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
 
 FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
   int ascent, descent, linegap, advance, bearing;
+  float x, y;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
-  float vskip = scale*(linegap+ascent-descent);
+  float vskip = scale*(linegap+ascent);
+  // FIXME: left extent is currently incorrect.
   extent->l = 0;
   extent->r = 0;
   extent->t = ascent;
   extent->b = -descent;
   extent->gap = linegap;
   
-  if(0 < size){
-    int right = 0;
-    size_t i=0;
-    // Get left extent by finding first real character.
-    for(; i<size; ++i){
-      if(text[i] == LINEFEED){
-        extent->b += vskip;
-      }else{
-        stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
-        right += advance;
-        extent->l = -bearing;
-        break;
-      }
+  stbtt_aligned_quad quad = {0};
+  for(size_t i=0; i<size; ++i){
+    int index = fond_codepoint_index(font, text[i]);
+    if(index < 0){
+      printf("FOND: Unloaded glyph %c (U+%x) at %i\n", text[i], text[i], text[i]);
+      fond_err(FOND_UNLOADED_GLYPH);
+      return 0;
     }
-    // Compute the maximal right and bottom extent.
-    for(; i<size; ++i){
-      if(text[i] == LINEFEED){
-        extent->b += vskip;
-        extent->r = (extent->r > right)? extent->r : right;
-        right = 0;
-      }else{
-        right += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]);
-        stbtt_GetCodepointHMetrics(font->fontinfo, text[i], &advance, &bearing);
-        right += advance;
-      }
+    
+    if(i>0)
+      x += stbtt_GetCodepointKernAdvance(font->fontinfo, text[i-1], text[i]) * scale;
+    stbtt_GetPackedQuad((stbtt_packedchar *)font->chardata, font->width, font->height, index, &x, &y, &quad, 0);
+
+    if(text[i] == LINEFEED){
+      extent->b -= vskip;
+      if(extent->r < x) extent->r = x;
+      x = 0;
     }
-    extent->r = (extent->r > right)? extent->r : right;
   }
+  if(x < quad.x0) x = quad.x0;
+  if(x < quad.x1) x = quad.x1;
+  if(extent->r < x) extent->r = x;
 
   fond_err(FOND_NO_ERROR);
-  extent->l *= scale;
-  extent->r *= scale;
   extent->t *= scale;
   extent->b *= scale;
   extent->gap *= scale;
