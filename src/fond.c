@@ -276,7 +276,7 @@ FOND_EXPORT int fond_compute_u(struct fond_font *font, int32_t *text, size_t siz
 FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size, size_t *_n, GLuint vbo, GLuint ebo){
   GLfloat *vert = 0;
   GLuint *ind = 0;
-  float x = 0, y = 0;
+  float x = 0.0, y = 0.0;
   
   if(!font->chardata){
     fond_err(FOND_NOT_LOADED);
@@ -361,7 +361,7 @@ FOND_EXPORT int fond_update_u(struct fond_font *font, int32_t *text, size_t size
 
 FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, size_t size, struct fond_extent *extent){
   int ascent, descent, linegap, advance, bearing;
-  float x, y;
+  float x = 0.0, y = 0.0;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
   float vskip = scale*(linegap+ascent);
