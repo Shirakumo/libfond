@@ -10,6 +10,7 @@
 #  define FOND_MAC
 #  define GL_GLEXT_PROTOTYPES
 #  include <OpenGL/gl3.h>
+#  include <OpenGL/gl3ext.h>
 #endif
 #if defined(__linux__)
 #  define FOND_LIN
