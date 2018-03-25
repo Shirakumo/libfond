@@ -364,7 +364,7 @@ FOND_EXPORT int fond_compute_extent_u(struct fond_font *font, int32_t *text, siz
   float x = 0.0, y = 0.0;
   stbtt_GetFontVMetrics(font->fontinfo, &ascent, &descent, &linegap);
   float scale = font->size / (ascent - descent);
-  float vskip = scale*(linegap+ascent);
+  float vskip = linegap+ascent;
   // FIXME: left extent is currently incorrect.
   extent->l = 0;
   extent->r = 0;
