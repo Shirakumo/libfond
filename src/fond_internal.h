@@ -19,7 +19,7 @@
 #  include <GL/glext.h>
 #endif
 
-int errorcode;
+extern int errorcode;
 void fond_err(int code);
 int fond_check_glerror();
 int fond_check_shader(GLuint shader);
